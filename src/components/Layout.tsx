@@ -1,7 +1,14 @@
-import React from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Package, Users, ClipboardList, Activity, ShoppingCart, BarChart } from 'lucide-react';
-import { useOnlineStatus } from '../hooks/useOnlineStatus';
+import React from "react";
+import { Outlet, Link, useLocation } from "react-router-dom";
+import {
+  Package,
+  Users,
+  ClipboardList,
+  Activity,
+  ShoppingCart,
+  BarChart,
+} from "lucide-react";
+import { useOnlineStatus } from "../hooks/useOnlineStatus";
 
 export function Layout() {
   const location = useLocation();
@@ -16,25 +23,52 @@ export function Layout() {
             Inventory Pro
           </h1>
         </div>
-        
+
         <nav className="mt-8">
-          <NavLink to="/" icon={<Package />} active={location.pathname === '/'}>
+          <NavLink to="/" icon={<Package />} active={location.pathname === "/"}>
             Inventory
           </NavLink>
-          <NavLink to="/vendors" icon={<Users />} active={location.pathname === '/vendors'}>
+          <NavLink
+            to="/vendors"
+            icon={<Users />}
+            active={location.pathname === "/vendors"}
+          >
             Vendors
           </NavLink>
-          <NavLink to="/transactions" icon={<Activity />} active={location.pathname === '/transactions'}>
+          <NavLink
+            to="/transactions"
+            icon={<Activity />}
+            active={location.pathname === "/transactions"}
+          >
             Transactions
           </NavLink>
-          <NavLink to="/orders" icon={<ClipboardList />} active={location.pathname === '/orders'}>
+          <NavLink
+            to="/orders"
+            icon={<ClipboardList />}
+            active={location.pathname === "/orders"}
+          >
             Purchase Orders
           </NavLink>
-          <NavLink to="/pos" icon={<ShoppingCart />} active={location.pathname === '/pos'}>
+          <NavLink
+            to="/pos"
+            icon={<ShoppingCart />}
+            active={location.pathname === "/pos"}
+          >
             Point of Sale
           </NavLink>
-          <NavLink to="/analytics" icon={<BarChart />} active={location.pathname === '/analytics'}>
+          <NavLink
+            to="/analytics"
+            icon={<BarChart />}
+            active={location.pathname === "/analytics"}
+          >
             Analytics
+          </NavLink>
+          <NavLink
+            to="/stock-receipts"
+            icon={<BarChart />}
+            active={location.pathname === "/stock-receipts"}
+          >
+            Stock Receipts
           </NavLink>
         </nav>
       </aside>
@@ -52,9 +86,17 @@ export function Layout() {
                   Syncing...
                 </span>
               )}
-              <span className={`flex items-center gap-1 ${isOnline ? 'text-green-600' : 'text-red-600'}`}>
-                <span className={`h-2 w-2 rounded-full ${isOnline ? 'bg-green-600' : 'bg-red-600'}`} />
-                {isOnline ? 'Online' : 'Offline'}
+              <span
+                className={`flex items-center gap-1 ${
+                  isOnline ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                <span
+                  className={`h-2 w-2 rounded-full ${
+                    isOnline ? "bg-green-600" : "bg-red-600"
+                  }`}
+                />
+                {isOnline ? "Online" : "Offline"}
               </span>
             </div>
           </div>
@@ -68,12 +110,24 @@ export function Layout() {
   );
 }
 
-function NavLink({ to, icon, children, active }: { to: string; icon: React.ReactNode; children: React.ReactNode; active: boolean }) {
+function NavLink({
+  to,
+  icon,
+  children,
+  active,
+}: {
+  to: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  active: boolean;
+}) {
   return (
     <Link
       to={to}
       className={`flex items-center gap-2 px-4 py-3 text-sm ${
-        active ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+        active
+          ? "bg-gray-800 text-white"
+          : "text-gray-300 hover:bg-gray-800 hover:text-white"
       }`}
     >
       {icon}
@@ -84,19 +138,19 @@ function NavLink({ to, icon, children, active }: { to: string; icon: React.React
 
 function getPageTitle(pathname: string): string {
   switch (pathname) {
-    case '/':
-      return 'Inventory';
-    case '/vendors':
-      return 'Vendors';
-    case '/transactions':
-      return 'Transactions';
-    case '/orders':
-      return 'Purchase Orders';
-    case '/pos':
-      return 'Point of Sale';
-    case '/analytics':
-      return 'Analytics';
+    case "/":
+      return "Inventory";
+    case "/vendors":
+      return "Vendors";
+    case "/transactions":
+      return "Transactions";
+    case "/orders":
+      return "Purchase Orders";
+    case "/pos":
+      return "Point of Sale";
+    case "/analytics":
+      return "Analytics";
     default:
-      return 'Inventory Management';
+      return "Inventory Management";
   }
 }

@@ -1,12 +1,14 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Layout } from './components/Layout';
-import { Inventory } from './pages/Inventory';
-import { Vendors } from './pages/Vendors';
-import { Transactions } from './pages/Transactions';
-import { PurchaseOrders } from './pages/PurchaseOrders';
-import { POS } from './pages/POS';
-import { Analytics } from './pages/Analytics';
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Layout } from "./components/Layout";
+import { Inventory } from "./pages/Inventory";
+import { Vendors } from "./pages/Vendors";
+import { Transactions } from "./pages/Transactions";
+import { PurchaseOrders } from "./pages/PurchaseOrders";
+import { POS } from "./pages/POS";
+import { Analytics } from "./pages/Analytics";
+import { StockReceiptList } from "./components/StockReceiptList";
+import { StockReceiptFormWrapper } from "./components/StockReceiptFormWrapper";
 
 function App() {
   return (
@@ -19,6 +21,15 @@ function App() {
           <Route path="orders" element={<PurchaseOrders />} />
           <Route path="pos" element={<POS />} />
           <Route path="analytics" element={<Analytics />} />
+          <Route path="stock-receipts" element={<StockReceiptList />} />
+          <Route
+            path="stock-receipts/new"
+            element={<StockReceiptFormWrapper />}
+          />
+          <Route
+            path="stock-receipts/:id"
+            element={<StockReceiptFormWrapper />}
+          />
         </Route>
       </Routes>
     </BrowserRouter>
