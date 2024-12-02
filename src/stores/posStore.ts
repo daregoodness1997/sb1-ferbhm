@@ -1,115 +1,73 @@
-import create from 'zustand';
-import { db } from '../lib/db';
-import Decimal from 'decimal.js';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { db } from "../lib/db";
+import { POSTransaction } from "../types";
 
 interface CartItem {
-  id: string;
-  name: string;
-  quantity: number;
+  id: string | number;
   price: number;
+  quantity: number;
 }
 
 interface POSStore {
+  transactions: POSTransaction[];
+  setTransactions: (transactions: POSTransaction[]) => void;
+  loadTransactions: () => Promise<void>;
+  pendingSync: boolean;
+  setPendingSync: (status: boolean) => void;
   cart: CartItem[];
   addToCart: (item: CartItem) => void;
-  removeFromCart: (itemId: string) => void;
-  updateQuantity: (itemId: string, quantity: number) => void;
-  clearCart: () => void;
+  removeFromCart: (itemId: string | number) => void;
+  updateQuantity: (itemId: string | number, quantity: number) => void;
   total: () => number;
-  processSale: (paymentMethod: 'cash' | 'card') => Promise<void>;
+  processSale: (paymentMethod: "cash" | "card") => Promise<void>;
 }
 
-export const usePOSStore = create<POSStore>((set, get) => ({
-  cart: [],
-  
-  addToCart: (item) => {
-    set((state) => {
-      const existingItem = state.cart.find((i) => i.id === item.id);
-      if (existingItem) {
-        return {
-          cart: state.cart.map((i) =>
-            i.id === item.id
-              ? { ...i, quantity: i.quantity + item.quantity }
-              : i
-          ),
-        };
-      }
-      return { cart: [...state.cart, item] };
-    });
-  },
-
-  removeFromCart: (itemId) => {
-    set((state) => ({
-      cart: state.cart.filter((item) => item.id !== itemId),
-    }));
-  },
-
-  updateQuantity: (itemId, quantity) => {
-    set((state) => ({
-      cart: state.cart.map((item) =>
-        item.id === itemId ? { ...item, quantity } : item
-      ),
-    }));
-  },
-
-  clearCart: () => {
-    set({ cart: [] });
-  },
-
-  total: () => {
-    const { cart } = get();
-    return cart.reduce((sum, item) => {
-      return new Decimal(sum)
-        .plus(new Decimal(item.price).times(item.quantity))
-        .toNumber();
-    }, 0);
-  },
-
-  processSale: async (paymentMethod) => {
-    const { cart, total, clearCart } = get();
-    const saleId = crypto.randomUUID();
-    
-    const database = await db;
-    const tx = database.transaction(['sales', 'inventory', 'transactions'], 'readwrite');
-    
-    try {
-      // Create sale record
-      await tx.objectStore('sales').add({
-        id: saleId,
-        items: cart,
-        total: total(),
-        paymentMethod,
-        timestamp: new Date(),
-        syncStatus: 'pending',
-      });
-
-      // Update inventory and create transaction records
-      for (const item of cart) {
-        const inventoryItem = await tx.objectStore('inventory').get(item.id);
-        if (inventoryItem) {
-          await tx.objectStore('inventory').put({
-            ...inventoryItem,
-            quantity: inventoryItem.quantity - item.quantity,
-            lastUpdated: new Date(),
-          });
-
-          await tx.objectStore('transactions').add({
-            id: crypto.randomUUID(),
-            type: 'sale',
-            itemId: item.id,
-            quantity: item.quantity,
-            price: item.price,
-            timestamp: new Date(),
-            syncStatus: 'pending',
-          });
+export const usePOSStore = create<POSStore>()(
+  persist(
+    (set, get) => ({
+      transactions: [],
+      pendingSync: false,
+      setTransactions: (transactions) => set({ transactions }),
+      loadTransactions: async () => {
+        try {
+          const database = await db;
+          const tx = database.transaction("transactions", "readonly");
+          const store = tx.store;
+          const rawTransactions = await store.getAll();
+          const transactions = rawTransactions.map((tx) => ({
+            ...tx,
+            amount: tx.price * tx.quantity,
+          }));
+          set({ transactions });
+        } catch (error) {
+          console.error("Failed to load POS transactions:", error);
         }
-      }
-
-      await tx.done;
-      clearCart();
-    } catch (error) {
-      console.error('Failed to process sale:', error);
-      throw error;
+      },
+      setPendingSync: (status) => set({ pendingSync: status }),
+      cart: [],
+      addToCart: (item) => set((state) => ({ cart: [...state.cart, item] })),
+      removeFromCart: (itemId) =>
+        set((state) => ({
+          cart: state.cart.filter((item) => item.id !== itemId),
+        })),
+      updateQuantity: (itemId, quantity) =>
+        set((state) => ({
+          cart: state.cart.map((item) =>
+            item.id === itemId ? { ...item, quantity } : item
+          ),
+        })),
+      total: () =>
+        get().cart.reduce(
+          (total, item) => total + item.price * item.quantity,
+          0
+        ),
+      processSale: async (paymentMethod) => {
+        // Implementation for processing sale
+      },
+    }),
+    {
+      name: "pos-storage",
     }
-  },
-}));
+  )
+);

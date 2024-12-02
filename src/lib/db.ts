@@ -1,4 +1,4 @@
-import { openDB, DBSchema } from 'idb';
+import { openDB, DBSchema } from "idb";
 
 interface InventoryDB extends DBSchema {
   inventory: {
@@ -14,7 +14,7 @@ interface InventoryDB extends DBSchema {
       lastUpdated: Date;
       vendorId: string;
     };
-    indexes: { 'by-sku': string };
+    indexes: { "by-sku": string };
   };
   vendors: {
     key: string;
@@ -31,14 +31,14 @@ interface InventoryDB extends DBSchema {
     key: string;
     value: {
       id: string;
-      type: 'in' | 'out' | 'sale';
+      type: "in" | "out" | "sale";
       itemId: string;
       quantity: number;
       price: number;
       timestamp: Date;
-      syncStatus: 'pending' | 'synced' | 'error';
+      syncStatus: "pending" | "synced" | "error";
     };
-    indexes: { 'by-status': string; 'by-date': string };
+    indexes: { "by-status": string; "by-date": string };
   };
   sales: {
     key: string;
@@ -50,28 +50,56 @@ interface InventoryDB extends DBSchema {
         price: number;
       }>;
       total: number;
-      paymentMethod: 'cash' | 'card';
+      paymentMethod: "cash" | "card";
       timestamp: Date;
-      syncStatus: 'pending' | 'synced' | 'error';
+      syncStatus: "pending" | "synced" | "error";
     };
-    indexes: { 'by-date': string };
+    indexes: { "by-date": string };
+  };
+  stockReceipts: {
+    key: string;
+    value: {
+      id: string;
+      vendorId: string;
+      date: string;
+      items: Array<{
+        itemId: string;
+        quantity: number;
+        unitPrice: number;
+        subtotal: number;
+      }>;
+      invoiceNumber: string;
+      totalAmount: number;
+      notes?: string;
+    };
+    indexes: { "by-date": string };
   };
 }
 
 export const initDB = async () => {
-  const db = await openDB<InventoryDB>('inventory-system', 1, {
+  const db = await openDB<InventoryDB>("inventory-system", 1, {
     upgrade(db) {
-      const inventoryStore = db.createObjectStore('inventory', { keyPath: 'id' });
-      inventoryStore.createIndex('by-sku', 'sku', { unique: true });
+      const inventoryStore = db.createObjectStore("inventory", {
+        keyPath: "id",
+      });
+      inventoryStore.createIndex("by-sku", "sku", { unique: true });
 
-      db.createObjectStore('vendors', { keyPath: 'id' });
+      if (!db.objectStoreNames.contains("vendors")) {
+        db.createObjectStore("vendors", { keyPath: "id" });
+      }
 
-      const transactionsStore = db.createObjectStore('transactions', { keyPath: 'id' });
-      transactionsStore.createIndex('by-status', 'syncStatus');
-      transactionsStore.createIndex('by-date', 'timestamp');
+      if (!db.objectStoreNames.contains("stockReceipts")) {
+        db.createObjectStore("stockReceipts", { keyPath: "id" });
+      }
 
-      const salesStore = db.createObjectStore('sales', { keyPath: 'id' });
-      salesStore.createIndex('by-date', 'timestamp');
+      const transactionsStore = db.createObjectStore("transactions", {
+        keyPath: "id",
+      });
+      transactionsStore.createIndex("by-status", "syncStatus");
+      transactionsStore.createIndex("by-date", "timestamp");
+
+      const salesStore = db.createObjectStore("sales", { keyPath: "id" });
+      salesStore.createIndex("by-date", "timestamp");
     },
   });
   return db;

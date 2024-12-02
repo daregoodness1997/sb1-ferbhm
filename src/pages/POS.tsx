@@ -1,12 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { usePOSStore } from '../stores/posStore';
-import { db } from '../lib/db';
-import { Search, ShoppingCart, Trash2, Plus, Minus } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { usePOSStore } from "../stores/posStore";
+import { db } from "../lib/db";
+import { Search, ShoppingCart, Trash2, Plus, Minus } from "lucide-react";
 
 export function POS() {
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [inventory, setInventory] = useState<any[]>([]);
-  const { cart, addToCart, removeFromCart, updateQuantity, total, processSale } = usePOSStore();
+  const {
+    cart,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    total,
+    processSale,
+  } = usePOSStore();
 
   useEffect(() => {
     loadInventory();
@@ -15,16 +22,17 @@ export function POS() {
   async function loadInventory() {
     try {
       const database = await db;
-      const items = await database.getAll('inventory');
+      const items = await database.getAll("inventory");
       setInventory(items);
     } catch (error) {
-      console.error('Failed to load inventory:', error);
+      console.error("Failed to load inventory:", error);
     }
   }
 
-  const filteredInventory = inventory.filter((item) =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.sku.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredInventory = inventory.filter(
+    (item) =>
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.sku.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleAddToCart = (item: any) => {
@@ -36,12 +44,12 @@ export function POS() {
     });
   };
 
-  const handleCheckout = async (paymentMethod: 'cash' | 'card') => {
+  const handleCheckout = async (paymentMethod: "cash" | "card") => {
     try {
       await processSale(paymentMethod);
-      alert('Sale completed successfully!');
+      alert("Sale completed successfully!");
     } catch (error) {
-      alert('Failed to process sale. Please try again.');
+      alert("Failed to process sale. Please try again.");
     }
   };
 
@@ -63,7 +71,7 @@ export function POS() {
         </div>
 
         <div className="grid grid-cols-3 gap-4">
-          {filteredInventory.map((item) => (
+          {filteredInventory?.map((item) => (
             <div
               key={item.id}
               className="bg-white p-4 rounded-lg shadow-sm cursor-pointer hover:shadow-md transition-shadow"
@@ -71,10 +79,8 @@ export function POS() {
             >
               <h3 className="font-medium">{item.name}</h3>
               <p className="text-sm text-gray-500">SKU: {item.sku}</p>
-              <p className="text-lg font-bold mt-2">${item.price.toFixed(2)}</p>
-              <p className="text-sm text-gray-500">
-                In Stock: {item.quantity}
-              </p>
+              <p className="text-lg font-bold mt-2">${item?.price}</p>
+              <p className="text-sm text-gray-500">In Stock: {item.quantity}</p>
             </div>
           ))}
         </div>
@@ -88,13 +94,13 @@ export function POS() {
         </div>
 
         <div className="flex-1 overflow-auto mb-6">
-          {cart.map((item) => (
+          {cart?.map((item) => (
             <div key={item.id} className="bg-white p-4 rounded-lg mb-2">
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-medium">{item.name}</h3>
+                  <h3 className="font-medium">{item?.name}</h3>
                   <p className="text-sm text-gray-500">
-                    ${item.price.toFixed(2)} each
+                    ${item?.price?.toFixed(2)} each
                   </p>
                 </div>
                 <button
@@ -106,7 +112,9 @@ export function POS() {
               </div>
               <div className="flex items-center mt-2">
                 <button
-                  onClick={() => updateQuantity(item.id, Math.max(0, item.quantity - 1))}
+                  onClick={() =>
+                    updateQuantity(item.id, Math.max(0, item.quantity - 1))
+                  }
                   className="p-1 rounded-full hover:bg-gray-100"
                 >
                   <Minus className="h-4 w-4" />
@@ -134,13 +142,13 @@ export function POS() {
 
           <div className="grid grid-cols-2 gap-4">
             <button
-              onClick={() => handleCheckout('cash')}
+              onClick={() => handleCheckout("cash")}
               className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
             >
               Cash Payment
             </button>
             <button
-              onClick={() => handleCheckout('card')}
+              onClick={() => handleCheckout("card")}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
             >
               Card Payment
