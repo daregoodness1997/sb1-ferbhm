@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useStockReceiptStore } from "../stores/stockReceiptStore";
 import { useVendorStore } from "../stores/vendorStore";
@@ -8,21 +7,31 @@ import { generateTempId } from "../utils/tempId";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { StockReceipt } from "../types";
 import { StockReceiptForm } from "./StockReceiptForm";
+import { useEffect } from "react";
 
 export function StockReceiptFormWrapper() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const isOnline = useOnlineStatus();
+  const { isOnline } = useOnlineStatus();
 
-  const { receipts, addReceipt, updateReceipt } = useStockReceiptStore();
-  const { vendors } = useVendorStore();
-  const { items } = useInventoryStore();
+  const { receipts, addReceipt, updateReceipt, loadReceipts } =
+    useStockReceiptStore();
+  const { vendors, loadVendors } = useVendorStore();
+  const { items, loadItems } = useInventoryStore();
+
+  useEffect(() => {
+    loadReceipts();
+    loadVendors();
+    loadItems();
+  }, []);
 
   const receipt = id ? receipts.find((r) => r.id === id) : null;
 
+  // console.log(vendors, receipts, items, "ventors>>>>");
+
   const handleSubmit = async (formData: StockReceipt) => {
     if (id) {
-      updateReceipt({ ...formData, id });
+      updateReceipt({ ...formData, id: id });
     } else {
       addReceipt({ ...formData, id: generateTempId() });
     }

@@ -27,8 +27,16 @@ export function Vendors() {
       const database = await db;
       const tx = database.transaction("vendors", "readonly");
       const store = tx.store;
-      const vendors = await store.getAll();
-      setVendors(vendors);
+      const rawVendors = await store.getAll();
+      const transformedVendors = rawVendors.map((v) => ({
+        id: Number(v.id),
+        name: v.name,
+        email: v.email,
+        phone: v.phone,
+        address: "",
+        notes: "",
+      }));
+      setVendors(transformedVendors);
     } catch (error) {
       console.error("Failed to load vendors:", error);
     }
@@ -41,9 +49,12 @@ export function Vendors() {
       const store = tx.store;
 
       const vendor = {
-        id: Date.now(),
-        ...newVendor,
-        lastUpdated: new Date().toISOString(),
+        id: String(Date.now()),
+        name: newVendor.name,
+        contact: newVendor.name,
+        email: newVendor.email,
+        phone: newVendor.phone,
+        lastOrder: new Date(),
       };
 
       await store.add(vendor);

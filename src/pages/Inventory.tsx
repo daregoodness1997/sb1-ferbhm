@@ -315,7 +315,7 @@ function AddItemForm({
         <input
           type="text"
           required
-          className="mt-1  block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          className="mt-1 p-1  block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
         />
@@ -325,7 +325,7 @@ function AddItemForm({
         <input
           type="text"
           required
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          className="mt-1 p-1  block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           value={formData.sku}
           onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
         />
@@ -338,7 +338,7 @@ function AddItemForm({
           type="number"
           required
           min="0"
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          className="mt-1 p-1  block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           value={formData.quantity}
           onChange={(e) =>
             setFormData({ ...formData, quantity: parseInt(e.target.value) })
@@ -353,7 +353,7 @@ function AddItemForm({
           type="number"
           required
           min="0"
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          className="mt-1 p-1  block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           value={formData.minQuantity}
           onChange={(e) =>
             setFormData({ ...formData, minQuantity: parseInt(e.target.value) })

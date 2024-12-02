@@ -84,7 +84,13 @@ export const initDB = async () => {
       });
       inventoryStore.createIndex("by-sku", "sku", { unique: true });
 
-      const vendorsStore = db.createObjectStore("vendors", { keyPath: "id" });
+      if (!db.objectStoreNames.contains("vendors")) {
+        db.createObjectStore("vendors", { keyPath: "id" });
+      }
+
+      if (!db.objectStoreNames.contains("stockReceipts")) {
+        db.createObjectStore("stockReceipts", { keyPath: "id" });
+      }
 
       const transactionsStore = db.createObjectStore("transactions", {
         keyPath: "id",
@@ -94,10 +100,6 @@ export const initDB = async () => {
 
       const salesStore = db.createObjectStore("sales", { keyPath: "id" });
       salesStore.createIndex("by-date", "timestamp");
-
-      if (!db.objectStoreNames.contains("stockReceipts")) {
-        db.createObjectStore("stockReceipts", { keyPath: "id" });
-      }
     },
   });
   return db;
