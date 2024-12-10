@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { db } from "../lib/db";
 import { Plus, X, Eye, Edit2 } from "lucide-react";
 
