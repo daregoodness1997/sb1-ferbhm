@@ -6,22 +6,22 @@ function createWindow() {
     width: 1200,
     height: 800,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, "preload.cjs"),
     },
   });
 
-  // In development, load from the Vite dev server
   if (process.env.NODE_ENV === "development") {
     mainWindow.loadURL("http://localhost:5173");
   } else {
-    // In production, load the built files
     mainWindow.loadFile(path.join(__dirname, "../dist/index.html"));
   }
 }
 
 app.whenReady().then(() => {
   createWindow();
+  require("../src/electron/printer.ts");
 
   app.on("activate", function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

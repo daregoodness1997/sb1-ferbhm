@@ -1,4 +1,4 @@
-import React from "react";
+import { ipcRenderer } from "electron";
 
 interface ReceiptProps {
   items: Array<{
@@ -10,7 +10,18 @@ interface ReceiptProps {
   timestamp: Date;
 }
 
-export const printReceipt = ({ items, total, timestamp }: ReceiptProps) => {
+export const printReceipt = async (data: ReceiptProps) => {
+  try {
+    await ipcRenderer.invoke("print-receipt", data);
+  } catch (error) {
+    console.error("Failed to print receipt:", error);
+    // Fallback to browser printing
+    printBrowserReceipt(data);
+  }
+};
+
+// Keep the browser printing as fallback
+const printBrowserReceipt = ({ items, total, timestamp }: ReceiptProps) => {
   const receipt = document.createElement("div");
   receipt.innerHTML = `
     <div style="font-family: monospace; width: 300px; padding: 10px;">
