@@ -24,7 +24,7 @@ interface POSStore {
 }
 
 export const usePOSStore = create<POSStore>()(
-  persist(
+  persist<POSStore>(
     (set, get) => ({
       transactions: [],
       pendingSync: false,
@@ -51,6 +51,7 @@ export const usePOSStore = create<POSStore>()(
         set((state) => ({
           cart: state.cart.filter((item) => item.id !== itemId),
         })),
+      emptyCart: () => set({ cart: [] }),
       updateQuantity: (itemId, quantity) =>
         set((state) => ({
           cart: state.cart.map((item) =>
@@ -59,7 +60,8 @@ export const usePOSStore = create<POSStore>()(
         })),
       total: () =>
         get().cart.reduce(
-          (total, item) => total + item.price * item.quantity,
+          (total, item) =>
+            total + Number(item.price || 0) * Number(item.quantity),
           0
         ),
       processSale: async (paymentMethod) => {

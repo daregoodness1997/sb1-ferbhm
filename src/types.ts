@@ -6,13 +6,16 @@ export interface POSTransaction {
 }
 
 export interface StockReceipt {
-  id: number;
+  id: string;
+  vendorId: string;
   date: string;
-  items: {
-    productId: number;
+  items: Array<{
+    itemId: string;
     quantity: number;
     unitPrice: number;
-  }[];
-  supplierId: number;
+    subtotal: number;
+  }>;
+  invoiceNumber: string;
   totalAmount: number;
+  notes?: string;
 }

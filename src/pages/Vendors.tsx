@@ -3,12 +3,38 @@ import { db } from "../lib/db";
 import { Plus, X, Eye, Edit2 } from "lucide-react";
 
 interface Vendor {
-  id?: number;
+  id?: string;
   name: string;
-  email: string;
+  contactPerson: string;
   phone: string;
+  email: string;
   address: string;
-  notes?: string;
+  website?: string;
+  vendorType: string[];
+  isPreferred: boolean;
+  paymentTerms: string;
+  discounts?: string;
+  lastPurchasePrice?: number;
+  transactionHistory: Array<{
+    date: Date;
+    amount: number;
+    invoiceNumber: string;
+  }>;
+  averageDeliveryTime?: number;
+  reliability: {
+    timelyDelivery: number;
+    qualityRating: number;
+  };
+  qualityFeedback: Array<{
+    date: Date;
+    feedback: string;
+  }>;
+  issues: Array<{
+    date: Date;
+    description: string;
+    resolved: boolean;
+  }>;
+  lastUpdated: Date;
 }
 
 export function Vendors() {
@@ -27,16 +53,8 @@ export function Vendors() {
       const database = await db;
       const tx = database.transaction("vendors", "readonly");
       const store = tx.store;
-      const rawVendors = await store.getAll();
-      const transformedVendors = rawVendors.map((v) => ({
-        id: Number(v.id),
-        name: v.name,
-        email: v.email,
-        phone: v.phone,
-        address: "",
-        notes: "",
-      }));
-      setVendors(transformedVendors);
+      const vendors = await store.getAll();
+      setVendors(vendors);
     } catch (error) {
       console.error("Failed to load vendors:", error);
     }
@@ -48,13 +66,20 @@ export function Vendors() {
       const tx = database.transaction("vendors", "readwrite");
       const store = tx.store;
 
-      const vendor = {
+      const vendor: Vendor = {
+        ...newVendor,
         id: String(Date.now()),
-        name: newVendor.name,
-        contact: newVendor.name,
-        email: newVendor.email,
-        phone: newVendor.phone,
-        lastOrder: new Date(),
+        vendorType: [],
+        isPreferred: false,
+        paymentTerms: "Net 30",
+        transactionHistory: [],
+        reliability: {
+          timelyDelivery: 0,
+          qualityRating: 0,
+        },
+        qualityFeedback: [],
+        issues: [],
+        lastUpdated: new Date(),
       };
 
       await store.add(vendor);
@@ -75,7 +100,7 @@ export function Vendors() {
 
       const vendor = {
         ...updatedVendor,
-        lastUpdated: new Date().toISOString(),
+        lastUpdated: new Date(),
       };
 
       await store.put(vendor);
@@ -110,10 +135,16 @@ export function Vendors() {
                 Name
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Contact Person
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Email
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Phone
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
@@ -124,8 +155,22 @@ export function Vendors() {
             {vendors.map((vendor) => (
               <tr key={vendor.id}>
                 <td className="px-6 py-4 whitespace-nowrap">{vendor.name}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  {vendor.contactPerson}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap">{vendor.email}</td>
                 <td className="px-6 py-4 whitespace-nowrap">{vendor.phone}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span
+                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      vendor.isPreferred
+                        ? "bg-green-100 text-green-800"
+                        : "bg-gray-100 text-gray-800"
+                    }`}
+                  >
+                    {vendor.isPreferred ? "Preferred" : "Regular"}
+                  </span>
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
                   <button
                     onClick={() => {
@@ -211,6 +256,14 @@ export function Vendors() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
+                  Contact Person
+                </label>
+                <div className="mt-1 text-sm text-gray-900">
+                  {selectedVendor.contactPerson}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
                   Email
                 </label>
                 <div className="mt-1 text-sm text-gray-900">
@@ -235,10 +288,26 @@ export function Vendors() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Notes
+                  Website
                 </label>
                 <div className="mt-1 text-sm text-gray-900">
-                  {selectedVendor.notes}
+                  {selectedVendor.website || "N/A"}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Payment Terms
+                </label>
+                <div className="mt-1 text-sm text-gray-900">
+                  {selectedVendor.paymentTerms}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Preferred Vendor
+                </label>
+                <div className="mt-1 text-sm text-gray-900">
+                  {selectedVendor.isPreferred ? "Yes" : "No"}
                 </div>
               </div>
             </div>
@@ -260,10 +329,21 @@ function VendorForm({
 }) {
   const [formData, setFormData] = useState<Vendor>({
     name: "",
+    contactPerson: "",
     email: "",
     phone: "",
     address: "",
-    notes: "",
+    vendorType: [],
+    isPreferred: false,
+    paymentTerms: "Net 30",
+    transactionHistory: [],
+    reliability: {
+      timelyDelivery: 0,
+      qualityRating: 0,
+    },
+    qualityFeedback: [],
+    issues: [],
+    lastUpdated: new Date(),
     ...initialData,
   });
 
@@ -281,7 +361,21 @@ function VendorForm({
           required
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          className="mt-1 p-1  block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">
+          Contact Person
+        </label>
+        <input
+          type="text"
+          required
+          value={formData.contactPerson}
+          onChange={(e) =>
+            setFormData({ ...formData, contactPerson: e.target.value })
+          }
+          className="mt-1 p-1  block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
         />
       </div>
       <div>
@@ -291,7 +385,7 @@ function VendorForm({
           required
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          className="mt-1 p-1  block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
         />
       </div>
       <div>
@@ -301,7 +395,7 @@ function VendorForm({
           required
           value={formData.phone}
           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          className="mt-1 p-1  block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
         />
       </div>
       <div>
@@ -314,18 +408,57 @@ function VendorForm({
           onChange={(e) =>
             setFormData({ ...formData, address: e.target.value })
           }
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          className="mt-1 p-1  block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           rows={3}
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700">Notes</label>
-        <textarea
-          value={formData.notes}
-          onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          rows={3}
+        <label className="block text-sm font-medium text-gray-700">
+          Website
+        </label>
+        <input
+          type="url"
+          value={formData.website}
+          onChange={(e) =>
+            setFormData({ ...formData, website: e.target.value })
+          }
+          className="mt-1 p-1  block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
         />
+      </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700">
+          Payment Terms
+        </label>
+        <select
+          required
+          value={formData.paymentTerms}
+          onChange={(e) =>
+            setFormData({ ...formData, paymentTerms: e.target.value })
+          }
+          className="mt-1 p-1 block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+        >
+          <option value="Net 30">Net 30</option>
+          <option value="Net 45">Net 45</option>
+          <option value="Net 60">Net 60</option>
+          <option value="Net 90">Net 90</option>
+          <option value="Due on Receipt">Due on Receipt</option>
+          <option value="2/10 Net 30">2/10 Net 30</option>
+          <option value="COD">COD (Cash on Delivery)</option>
+          <option value="Due When Consumed">Due When Consumed</option>
+        </select>
+      </div>
+      <div className="flex items-center">
+        <input
+          type="checkbox"
+          checked={formData.isPreferred}
+          onChange={(e) =>
+            setFormData({ ...formData, isPreferred: e.target.checked })
+          }
+          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+        />
+        <label className="ml-2 block text-sm text-gray-900">
+          Preferred Vendor
+        </label>
       </div>
       <div className="flex justify-end space-x-3">
         <button

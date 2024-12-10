@@ -1,15 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { db } from '../lib/db';
-import { ArrowUpRight, ArrowDownRight, Filter } from 'lucide-react';
-import { format } from 'date-fns';
-import { Card } from '../components/ui/Card';
-import { Badge } from '../components/ui/Badge';
-import { Button } from '../components/ui/Button';
+import React, { useState, useEffect } from "react";
+import { db } from "../lib/db";
+import { ArrowUpRight, ArrowDownRight, Filter } from "lucide-react";
+import { format } from "date-fns";
+import { Card } from "../components/ui/Card";
+import { Badge } from "../components/ui/Badge";
+import { Button } from "../components/ui/Button";
 
 export function Transactions() {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'in' | 'out'>('all');
+  const [filter, setFilter] = useState<"all" | "in" | "out">("all");
+  const [startDate, setStartDate] = useState<string>(
+    new Date(new Date().setMonth(new Date().getMonth() - 1))
+      .toISOString()
+      .split("T")[0]
+  );
+  const [endDate, setEndDate] = useState<string>(
+    new Date().toISOString().split("T")[0]
+  );
 
   useEffect(() => {
     loadTransactions();
@@ -18,30 +26,43 @@ export function Transactions() {
   async function loadTransactions() {
     try {
       const database = await db;
-      const tx = await database.transaction(['transactions', 'inventory'], 'readonly');
-      const transactions = await tx.objectStore('transactions').getAll();
-      
+      const tx = await database.transaction(
+        ["transactions", "inventory"],
+        "readonly"
+      );
+      const transactions = await tx.objectStore("transactions").getAll();
+
       const enrichedTransactions = await Promise.all(
         transactions.map(async (transaction) => {
-          const item = await tx.objectStore('inventory').get(transaction.itemId);
+          const item = await tx
+            .objectStore("inventory")
+            .get(transaction.itemId);
           return {
             ...transaction,
-            itemName: item?.name || 'Unknown Item',
+            itemName: item?.name || "Unknown Item",
           };
         })
       );
 
       setTransactions(enrichedTransactions);
     } catch (error) {
-      console.error('Failed to load transactions:', error);
+      console.error("Failed to load transactions:", error);
     } finally {
       setLoading(false);
     }
   }
 
-  const filteredTransactions = transactions.filter((t) => 
-    filter === 'all' ? true : t.type === filter
-  );
+  const filteredTransactions = transactions.filter((t) => {
+    const transactionDate = new Date(t.date);
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59); // Include the entire end date
+
+    const matchesType = filter === "all" ? true : t.type === filter;
+    const matchesDateRange = transactionDate >= start && transactionDate <= end;
+
+    return matchesType && matchesDateRange;
+  });
 
   if (loading) {
     return (
@@ -55,15 +76,34 @@ export function Transactions() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Stock Transactions</h1>
-          <p className="text-sm text-gray-500 mt-1">Track all inventory movements</p>
+          <h1 className="text-2xl font-semibold text-gray-900">
+            Stock Transactions
+          </h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Track all inventory movements
+          </p>
         </div>
         <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="bg-white border border-gray-200 rounded-lg text-sm py-1.5 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <span className="text-gray-500">to</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="bg-white border border-gray-200 rounded-lg text-sm py-1.5 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
           <Filter className="h-4 w-4 text-gray-400" />
           <select
             className="bg-white border border-gray-200 rounded-lg text-sm py-1.5 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={filter}
-            onChange={(e) => setFilter(e.target.value as any)}
+            onChange={(e) => setFilter(e.target.value as "all" | "in" | "out")}
           >
             <option value="all">All Transactions</option>
             <option value="in">Stock In</option>
@@ -98,19 +138,19 @@ export function Transactions() {
               {filteredTransactions.map((transaction) => (
                 <tr key={transaction.id} className="hover:bg-gray-50/50">
                   <td className="px-6 py-4 text-sm text-gray-600">
-                    {format(new Date(transaction.timestamp), 'MMM d, yyyy HH:mm')}
+                    {format(new Date(transaction?.date), "MMM d, yyyy HH:mm")}
                   </td>
                   <td className="px-6 py-4">
                     <Badge
-                      variant={transaction.type === 'in' ? 'success' : 'error'}
+                      variant={transaction.type === "in" ? "success" : "error"}
                       className="gap-1"
                     >
-                      {transaction.type === 'in' ? (
+                      {transaction.type === "in" ? (
                         <ArrowDownRight className="h-3 w-3" />
                       ) : (
                         <ArrowUpRight className="h-3 w-3" />
                       )}
-                      {transaction.type === 'in' ? 'Stock In' : 'Stock Out'}
+                      {transaction.type === "in" ? "Stock In" : "Stock Out"}
                     </Badge>
                   </td>
                   <td className="px-6 py-4">
@@ -124,11 +164,11 @@ export function Transactions() {
                   <td className="px-6 py-4">
                     <Badge
                       variant={
-                        transaction.syncStatus === 'synced'
-                          ? 'success'
-                          : transaction.syncStatus === 'pending'
-                          ? 'warning'
-                          : 'error'
+                        transaction.syncStatus === "synced"
+                          ? "success"
+                          : transaction.syncStatus === "pending"
+                          ? "warning"
+                          : "error"
                       }
                     >
                       {transaction.syncStatus}

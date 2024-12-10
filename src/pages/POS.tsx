@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { usePOSStore } from "../stores/posStore";
 import { db } from "../lib/db";
 import { Search, ShoppingCart, Trash2, Plus, Minus } from "lucide-react";
+import { printReceipt } from "../components/ReceiptPrinter";
 
 export function POS() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -13,6 +14,7 @@ export function POS() {
     updateQuantity,
     total,
     processSale,
+    emptyCart,
   } = usePOSStore();
 
   useEffect(() => {
@@ -36,22 +38,38 @@ export function POS() {
   );
 
   const handleAddToCart = (item: any) => {
-    addToCart({
-      id: item.id,
-      name: item.name,
-      quantity: 1,
-      price: item.price,
-    });
+    const existingItem = cart.find((cartItem) => cartItem.id === item.id);
+    if (existingItem) {
+      updateQuantity(item.id, existingItem.quantity + 1);
+    } else {
+      addToCart({
+        id: item.id,
+        name: item.name,
+        quantity: 1,
+        price: item.price || 0,
+      });
+    }
+  };
+
+  const handleEmptyCart = () => {
+    emptyCart();
   };
 
   const handleCheckout = async (paymentMethod: "cash" | "card") => {
     try {
       await processSale(paymentMethod);
+      printReceipt({
+        items: cart,
+        total: total(),
+        timestamp: new Date(),
+      });
       alert("Sale completed successfully!");
     } catch (error) {
       alert("Failed to process sale. Please try again.");
     }
   };
+
+  console.log(cart, filteredInventory, ">>> debugger");
 
   return (
     <div className="flex h-[calc(100vh-4rem)]">
@@ -79,7 +97,7 @@ export function POS() {
             >
               <h3 className="font-medium">{item.name}</h3>
               <p className="text-sm text-gray-500">SKU: {item.sku}</p>
-              <p className="text-lg font-bold mt-2">${item?.price}</p>
+              <p className="text-lg font-bold mt-2">₦{item?.price || 0}</p>
               <p className="text-sm text-gray-500">In Stock: {item.quantity}</p>
             </div>
           ))}
@@ -88,9 +106,19 @@ export function POS() {
 
       {/* Cart */}
       <div className="w-1/3 bg-gray-50 p-6 border-l">
-        <div className="flex items-center mb-6">
-          <ShoppingCart className="h-6 w-6 mr-2" />
-          <h2 className="text-xl font-medium">Current Sale</h2>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center">
+            <ShoppingCart className="h-6 w-6 mr-2" />
+            <h2 className="text-xl font-medium">Current Sale</h2>
+          </div>
+          {cart.length > 0 && (
+            <button
+              onClick={handleEmptyCart}
+              className="text-red-500 hover:text-red-700 text-sm"
+            >
+              Empty Cart
+            </button>
+          )}
         </div>
 
         <div className="flex-1 overflow-auto mb-6">
@@ -100,7 +128,7 @@ export function POS() {
                 <div>
                   <h3 className="font-medium">{item?.name}</h3>
                   <p className="text-sm text-gray-500">
-                    ${item?.price?.toFixed(2)} each
+                    ₦{item?.price?.toFixed(2) || 0} each
                   </p>
                 </div>
                 <button
@@ -127,7 +155,7 @@ export function POS() {
                   <Plus className="h-4 w-4" />
                 </button>
                 <span className="ml-auto font-medium">
-                  ${(item.price * item.quantity).toFixed(2)}
+                  ₦{(Number(item.price || 0) * item.quantity).toFixed(2)}
                 </span>
               </div>
             </div>
@@ -137,7 +165,7 @@ export function POS() {
         <div className="border-t pt-4">
           <div className="flex justify-between items-center mb-6">
             <span className="text-xl font-medium">Total</span>
-            <span className="text-xl font-bold">${total().toFixed(2)}</span>
+            <span className="text-xl font-bold">₦{total().toFixed(2)}</span>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
