@@ -9,6 +9,7 @@ import { POS } from "./pages/POS";
 import { Analytics } from "./pages/Analytics";
 import { StockReceiptList } from "./components/StockReceiptList";
 import { StockReceiptFormWrapper } from "./components/StockReceiptFormWrapper";
+import { InventoryItem } from "./pages/InventoryItem";
 
 function App() {
   return (
@@ -16,6 +17,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Inventory />} />
+          <Route path="inventory" element={<Inventory />} />
+          <Route path="inventory/:id" element={<InventoryItem />} />
           <Route path="vendors" element={<Vendors />} />
           <Route path="transactions" element={<Transactions />} />
           <Route path="orders" element={<PurchaseOrders />} />

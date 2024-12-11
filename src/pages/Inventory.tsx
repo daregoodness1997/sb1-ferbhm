@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { db } from "../lib/db";
-import { AlertTriangle, Plus, X, Eye, Edit2 } from "lucide-react";
+import { AlertTriangle, Plus, X, Eye, Edit2, BarChart2 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export function Inventory() {
   const [items, setItems] = useState<any[]>([]);
@@ -208,6 +209,12 @@ export function Inventory() {
                   >
                     <Edit2 className="h-4 w-4 inline" />
                   </button>
+                  <Link
+                    to={`/inventory/${item.id}`}
+                    className="text-purple-600 hover:text-purple-900"
+                  >
+                    <BarChart2 className="h-4 w-4 inline" />
+                  </Link>
                 </td>
               </tr>
             ))}
