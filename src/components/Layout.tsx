@@ -7,6 +7,7 @@ import {
   Activity,
   ShoppingCart,
   BarChart,
+  BookCopy,
 } from "lucide-react";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 
@@ -26,6 +27,13 @@ export function Layout() {
         <nav className="mt-8">
           <NavLink to="/" icon={<Package />} active={location.pathname === "/"}>
             Inventory
+          </NavLink>
+          <NavLink
+            to="/"
+            icon={<BookCopy />}
+            active={location.pathname === "/products"}
+          >
+            Products
           </NavLink>
           <NavLink
             to="/vendors"

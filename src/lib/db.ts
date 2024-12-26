@@ -1,7 +1,34 @@
 import { openDB, DBSchema } from "idb";
 
 interface InventoryDB extends DBSchema {
-  location: {
+  products: {
+    key: string;
+    value: {
+      productID: string;
+      productName: string;
+      catergoryID: string;
+      sku: string;
+      status: "active" | "in-active";
+      lastUpdated: Date;
+      createdAt: Date;
+      syncStatus: "pending" | "synced" | "error";
+    };
+    indexes: { "by-productID": string };
+  };
+  categories: {
+    key: string;
+    value: {
+      categoryID: string;
+      categoryName: string;
+      status: "active" | "in-active";
+      lastUpdated: Date;
+      createdAt: Date;
+      syncStatus: "pending" | "synced" | "error";
+    };
+    indexes: { "by-categoryID": string };
+  };
+
+  locations: {
     key: string;
     value: {
       locationID: string;
@@ -10,62 +37,100 @@ interface InventoryDB extends DBSchema {
       email: string;
       address: string;
       status: "active" | "in-active";
-      createdAt: string;
+      lastUpdated: Date;
+      createdAt: Date;
+      syncStatus: "pending" | "synced" | "error";
     };
     indexes: { "by-locationID": string };
   };
-  userAvtivity: {
+  activities: {
     key: string;
     value: {
       locationID: string;
       activityID: string;
       actionedBy: string;
-      createdAt: string;
       actionType: string;
+      lastUpdated: Date;
+      createdAt: Date;
+      syncStatus: "pending" | "synced" | "error";
     };
     indexes: { "by-activityID": string };
+  };
+
+  customers: {
+    key: string;
+    value: {
+      customerID: string;
+      customerName: string;
+      customerEmail: string;
+      customerPhone: string;
+      lastUpdated: Date;
+      createdAt: Date;
+      syncStatus: "pending" | "synced" | "error";
+    };
+    indexes: { "by-customerID": string };
+  };
+
+  suppliers: {
+    key: string;
+    value: {
+      supplierID: string;
+      supplierName: string;
+      contactInfo: {
+        contactPerson?: string;
+        phone?: string;
+        email?: string;
+        address?: string;
+      };
+      website?: string;
+      paymentTerms: string;
+      lastUpdated: Date;
+      createdAt: Date;
+      syncStatus: "pending" | "synced" | "error";
+    };
+    indexes: { "by-supplierID": string };
+  };
+
+  sales: {
+    key: string;
+    value: {
+      saleId?: string;
+      customerId?: string;
+      salesDate: string;
+      totalAmount: string;
+      lastUpdated: Date;
+      createdAt: Date;
+      syncStatus: "pending" | "synced" | "error";
+    };
+    indexes: { "by-saleID": string };
+  };
+  sales_items: {
+    key: string;
+    value: {
+      saleId?: string;
+      saleItemId?: string;
+      menuId?: string;
+      quantity: number;
+      price: number;
+      lastUpdated: Date;
+      createdAt: Date;
+      syncStatus: "pending" | "synced" | "error";
+    };
+    indexes: { "by-saleItemId": string };
   };
 
   inventory: {
     key: string;
     value: {
-      id: string;
-      name: string;
-      quantity: number;
-      price: number;
-      lastUpdated: Date;
+      inventoryID: string;
+      productID: string;
+      quantityInStock: number;
       category: string;
-      currentQuantity: number;
-      reorderLevel: number;
-      reorderQuantity: number;
-      isPerishable: boolean;
-      storageLocation: string;
-      expiryDate?: Date;
-      batchNumber: string;
-      notes?: string;
-      stockValue: string;
-
-      // Sales
-      forSale: boolean;
-      // Audit & Usage
-      usageRate: number;
-      wastage: number;
-      auditDate: Date;
-      auditNotes?: string;
+      lastUpdated: Date;
+      createdAt: Date;
+      syncStatus: "pending" | "synced" | "error";
     };
-    indexes: { "by-sku": string };
-  };
-
-  requisition: {};
-  inventoryHistory: {
-    key: string;
-    value: {
-      id: string;
-      invId: string;
-      state: "inflow" | "outflow";
-      vendorId: string;
-    };
-    indexes: { "by-sku": string };
+    indexes: { "by-inventoryID": string };
   };
 
   purchaseOrders: {
@@ -75,110 +140,36 @@ interface InventoryDB extends DBSchema {
       vendorId: string;
       vendorName: string;
       status: "pending" | "approved" | "received" | "cancelled";
-      items: Array<{
-        id: string;
-        name: string;
-        quantity: number;
-        price: number;
-      }>;
+      productIDs: string[];
       totalAmount: number;
       createdAt: Date;
       expectedDelivery: string;
+      syncStatus: "pending" | "synced" | "error";
     };
     indexes: { "by-status": string };
   };
-  vendors: {
+
+  inventory_transactions: {
     key: string;
     value: {
-      id: string;
-      name: string;
-      contactPerson: string;
-      phone: string;
-      email: string;
-      address: string;
-      website?: string;
-      vendorType: string[];
-      isPreferred: boolean;
-      paymentTerms: string;
-      discounts?: string;
-      lastPurchasePrice?: number;
-      transactionHistory: Array<{
-        date: Date;
-        amount: number;
-        invoiceNumber: string;
-      }>;
-      averageDeliveryTime?: number;
-      reliability: {
-        timelyDelivery: number;
-        qualityRating: number;
-      };
-      qualityFeedback: Array<{
-        date: Date;
-        feedback: string;
-      }>;
-      issues: Array<{
-        date: Date;
-        description: string;
-        resolved: boolean;
-      }>;
-      lastUpdated: Date;
-    };
-  };
-  transactions: {
-    key: string;
-    value: {
-      id: string;
-      type: "in" | "out" | "sale";
-      itemId: string;
+      transactionID: string;
+      type: "purchase" | "requisition";
+      inventoryID: string;
+      productID: string;
       quantity: number;
-      price: number;
-      timestamp: Date;
+      lastUpdated: Date;
+      createdAt: Date;
       syncStatus: "pending" | "synced" | "error";
     };
     indexes: { "by-status": string; "by-date": string };
   };
-  sales: {
+  sales_transactions: {
     key: string;
     value: {
-      id: string;
-      items: Array<{
-        itemId: string;
-        quantity: number;
-        price: number;
-      }>;
-      total: number;
-      paymentMethod: "cash" | "card";
-      timestamp: Date;
-      syncStatus: "pending" | "synced" | "error";
-    };
-    indexes: { "by-date": string };
-  };
-  stockReceipts: {
-    key: string;
-    value: {
-      id: string;
-      vendorId: string;
-      date: string;
-      items: Array<{
-        itemId: string;
-        quantity: number;
-        unitPrice: number;
-        subtotal: number;
-      }>;
-      invoiceNumber: string;
-      totalAmount: number;
-      notes?: string;
-    };
-    indexes: { "by-date": string };
-  };
-  locations: {
-    key: string;
-    value: {
-      id: string;
-      name: string;
-      organizationId: string;
-      status: "active" | "in-active";
-      timestamp: Date;
+      transactionID: string;
+      salesID: string;
+      lastUpdated: Date;
+      createdAt: Date;
       syncStatus: "pending" | "synced" | "error";
     };
     indexes: { "by-status": string; "by-date": string };
@@ -188,37 +179,101 @@ interface InventoryDB extends DBSchema {
 export const initDB = async () => {
   const db = await openDB<InventoryDB>("inventory-system", 1, {
     upgrade(db) {
-      // Create inventory store
-      const inventoryStore = db.createObjectStore("inventory", {
-        keyPath: "id",
+      // Create products store
+      const productsStore = db.createObjectStore("products", {
+        keyPath: "productID",
       });
-      inventoryStore.createIndex("by-sku", "sku", { unique: true });
+      productsStore.createIndex("by-productID", "productID", { unique: true });
 
-      // Create vendors store
-      const vendorsStore = db.createObjectStore("vendors", { keyPath: "id" });
-
-      // Create stock receipts store
-      const stockReceiptsStore = db.createObjectStore("stockReceipts", {
-        keyPath: "id",
+      // Create categories store
+      const categoriesStore = db.createObjectStore("categories", {
+        keyPath: "categoryID",
       });
-      stockReceiptsStore.createIndex("by-date", "date");
-
-      // Create transactions store
-      const transactionsStore = db.createObjectStore("transactions", {
-        keyPath: "id",
+      categoriesStore.createIndex("by-categoryID", "categoryID", {
+        unique: true,
       });
-      transactionsStore.createIndex("by-status", "syncStatus");
-      transactionsStore.createIndex("by-date", "timestamp");
+
+      // Create locations store
+      const locationsStore = db.createObjectStore("locations", {
+        keyPath: "locationID",
+      });
+      locationsStore.createIndex("by-locationID", "locationID", {
+        unique: true,
+      });
+
+      // Create activities store
+      const activitiesStore = db.createObjectStore("activities", {
+        keyPath: "activityID",
+      });
+      activitiesStore.createIndex("by-activityID", "activityID", {
+        unique: true,
+      });
+
+      // Create customers store
+      const customersStore = db.createObjectStore("customers", {
+        keyPath: "customerID",
+      });
+      customersStore.createIndex("by-customerID", "customerID", {
+        unique: true,
+      });
+
+      // Create suppliers store
+      const suppliersStore = db.createObjectStore("suppliers", {
+        keyPath: "supplierID",
+      });
+      suppliersStore.createIndex("by-supplierID", "supplierID", {
+        unique: true,
+      });
 
       // Create sales store
-      const salesStore = db.createObjectStore("sales", { keyPath: "id" });
-      salesStore.createIndex("by-date", "timestamp");
+      const salesStore = db.createObjectStore("sales", {
+        keyPath: "saleId",
+      });
+      salesStore.createIndex("by-saleID", "saleId", {
+        unique: true,
+      });
 
-      // Create purchase orders store
+      // Create sales_items store
+      const salesItemsStore = db.createObjectStore("sales_items", {
+        keyPath: "saleItemId",
+      });
+      salesItemsStore.createIndex("by-saleItemId", "saleItemId", {
+        unique: true,
+      });
+
+      // Create inventory store
+      const inventoryStore = db.createObjectStore("inventory", {
+        keyPath: "inventoryID",
+      });
+      inventoryStore.createIndex("by-inventoryID", "inventoryID", {
+        unique: true,
+      });
+
+      // Create purchaseOrders store
       const purchaseOrdersStore = db.createObjectStore("purchaseOrders", {
         keyPath: "id",
       });
       purchaseOrdersStore.createIndex("by-status", "status");
+
+      // Create inventory_transactions store
+      const inventoryTransactionsStore = db.createObjectStore(
+        "inventory_transactions",
+        {
+          keyPath: "transactionID",
+        }
+      );
+      inventoryTransactionsStore.createIndex("by-status", "syncStatus");
+      inventoryTransactionsStore.createIndex("by-date", "createdAt");
+
+      // Create sales_transactions store
+      const salesTransactionsStore = db.createObjectStore(
+        "sales_transactions",
+        {
+          keyPath: "transactionID",
+        }
+      );
+      salesTransactionsStore.createIndex("by-status", "syncStatus");
+      salesTransactionsStore.createIndex("by-date", "createdAt");
     },
   });
   return db;

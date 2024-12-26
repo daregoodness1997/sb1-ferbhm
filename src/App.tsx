@@ -11,6 +11,7 @@ import { StockReceiptList } from "./components/StockReceiptList";
 import { StockReceiptFormWrapper } from "./components/StockReceiptFormWrapper";
 import { InventoryItem } from "./pages/InventoryItem";
 import { Menu } from "./pages/Menu";
+import Products from "./pages/Products";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Inventory />} />
           <Route path="inventory" element={<Inventory />} />
+          <Route path="products" element={<Products />} />
           <Route path="inventory/:id" element={<InventoryItem />} />
           <Route path="vendors" element={<Vendors />} />
           <Route path="transactions" element={<Transactions />} />

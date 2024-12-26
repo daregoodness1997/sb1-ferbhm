@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import Modal from "../components/ui/Modal";
 import { Table } from "../components/ui/Table";
 import Select from "../components/ui/Select";
+import Form from "../components/ui/Form";
 
 export function Inventory() {
   const [items, setItems] = useState<any[]>([]);
@@ -38,11 +39,7 @@ export function Inventory() {
 
       await store.add(item);
       await tstore.add({
-        id: Date.now().toString(),
-        itemId: item.id,
-        type: "in",
-        quantity: item.quantity,
-        date: new Date().toISOString(),
+        ...item,
         timestamp: new Date(),
         syncStatus: "synced",
       });
@@ -122,6 +119,34 @@ export function Inventory() {
     );
   }
 
+  const inventoryFields = [
+    { label: "Name", type: "text", name: "name", required: true },
+    { label: "SKU", type: "text", name: "sku", required: true },
+    { label: "Quantity", type: "number", name: "quantity" },
+    {
+      label: "Minimum Quantity",
+      type: "number",
+      name: "minQuantity",
+      required: true,
+    },
+    { label: "Price", type: "number", name: "price", required: true },
+    {
+      label: "Category",
+      type: "select",
+      name: "category",
+      options: [
+        { value: "Raw Materials", label: "Raw Materials" },
+        { value: "Finished Goods", label: "Finished Goods" },
+      ],
+      required: true,
+    },
+    {
+      label: "Vendors",
+      type: "select",
+      name: "vendors",
+      options: vendors.map((item) => ({ value: item.name, label: item.name })),
+    },
+  ];
   return (
     <div>
       <div className="mb-6 flex justify-between items-center">
@@ -131,13 +156,22 @@ export function Inventory() {
             Manage your inventory items and stock levels
           </p>
         </div>
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700"
-        >
-          <Plus className="h-4 w-4" />
-          Add Item
-        </button>
+
+        <div className="flex gap-2 flex-end">
+          <button
+            type="button"
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+          >
+            Request Item
+          </button>
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700"
+          >
+            <Plus className="h-4 w-4" />
+            Add Item
+          </button>{" "}
+        </div>
       </div>
 
       <div className="bg-white shadow-sm rounded-lg overflow-hidden">
@@ -206,10 +240,10 @@ export function Inventory() {
           handleClose={() => setIsAddModalOpen(false)}
           isOpen={isAddModalOpen}
         >
-          <AddItemForm
+          <Form
+            fields={inventoryFields}
             onSubmit={handleAddItem}
             onCancel={() => setIsAddModalOpen(false)}
-            vendors={vendors}
           />
         </Modal>
         <Modal
@@ -220,14 +254,11 @@ export function Inventory() {
           }}
           isOpen={isEditModalOpen && selectedItem}
         >
-          <AddItemForm
+          <Form
+            fields={inventoryFields}
             onSubmit={handleEditItem}
-            onCancel={() => {
-              setIsEditModalOpen(false);
-              setSelectedItem(null);
-            }}
+            onCancel={() => setIsAddModalOpen(false)}
             initialData={selectedItem}
-            vendors={vendors}
           />
         </Modal>
         <Modal
