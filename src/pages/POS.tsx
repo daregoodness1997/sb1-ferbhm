@@ -4,6 +4,20 @@ import { db } from "../lib/db";
 import { Search, ShoppingCart, Trash2, Plus, Minus } from "lucide-react";
 import { printReceipt } from "../components/ReceiptPrinter";
 
+interface Item {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+}
+
+interface ReceiptData {
+  items: Item[];
+  total: number;
+  cash: number;
+  change: number;
+}
+
 export function POS() {
   const [searchTerm, setSearchTerm] = useState("");
   const [inventory, setInventory] = useState<any[]>([]);
@@ -21,11 +35,44 @@ export function POS() {
     loadInventory();
   }, []);
 
+  const handlePrint = async () => {
+    if (cart.length === 0) {
+      console.log("Please add items to the receipt");
+      return;
+    }
+
+    // if (cash < total) {
+    //   console.log("Insufficient cash provided");
+    //   return;
+    // }
+
+    try {
+      const receiptData: ReceiptData = {
+        items: cart,
+        total: 100,
+        cash: 100,
+        change: 0,
+      };
+
+      // Check if running in Electron and if electronAPI and printReceipt are defined
+      if (typeof window !== "undefined") {
+        const result = await window.electronAPI.printReceipt(receiptData);
+        console.log(result.message);
+      } else {
+        console.error("electronAPI or printReceipt is not defined");
+        alert("Printing is not available in this environment.");
+      }
+    } catch (error) {
+      alert(`Error: ${error.message}`);
+    }
+  };
+
   async function loadInventory() {
     try {
       const database = await db;
       const items = await database.getAll("inventory");
-      setInventory(items);
+      const forSaleItems = items.filter((item) => item.forSale);
+      setInventory(forSaleItems);
     } catch (error) {
       console.error("Failed to load inventory:", error);
     }
@@ -58,11 +105,12 @@ export function POS() {
   const handleCheckout = async (paymentMethod: "cash" | "card") => {
     try {
       await processSale(paymentMethod);
-      printReceipt({
-        items: cart,
-        total: total(),
-        timestamp: new Date(),
-      });
+      handlePrint();
+      // printReceipt({
+      //   items: cart,
+      //   total: total(),
+      //   timestamp: new Date(),
+      // });
       alert("Sale completed successfully!");
     } catch (error) {
       alert("Failed to process sale. Please try again.");

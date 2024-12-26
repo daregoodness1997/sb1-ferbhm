@@ -10,6 +10,7 @@ import { Analytics } from "./pages/Analytics";
 import { StockReceiptList } from "./components/StockReceiptList";
 import { StockReceiptFormWrapper } from "./components/StockReceiptFormWrapper";
 import { InventoryItem } from "./pages/InventoryItem";
+import { Menu } from "./pages/Menu";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
           <Route path="transactions" element={<Transactions />} />
           <Route path="orders" element={<PurchaseOrders />} />
           <Route path="pos" element={<POS />} />
+          <Route path="menu" element={<Menu />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="stock-receipts" element={<StockReceiptList />} />
           <Route

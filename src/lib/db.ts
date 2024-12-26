@@ -1,18 +1,40 @@
 import { openDB, DBSchema } from "idb";
 
 interface InventoryDB extends DBSchema {
+  location: {
+    key: string;
+    value: {
+      locationID: string;
+      location: string;
+      invId: string;
+      email: string;
+      address: string;
+      status: "active" | "in-active";
+      createdAt: string;
+    };
+    indexes: { "by-locationID": string };
+  };
+  userAvtivity: {
+    key: string;
+    value: {
+      locationID: string;
+      activityID: string;
+      actionedBy: string;
+      createdAt: string;
+      actionType: string;
+    };
+    indexes: { "by-activityID": string };
+  };
+
   inventory: {
     key: string;
     value: {
       id: string;
       name: string;
-      sku: string;
       quantity: number;
-      minQuantity: number;
       price: number;
       lastUpdated: Date;
       category: string;
-      uom: string;
       currentQuantity: number;
       reorderLevel: number;
       reorderQuantity: number;
@@ -22,29 +44,48 @@ interface InventoryDB extends DBSchema {
       batchNumber: string;
       notes?: string;
       stockValue: string;
-      // Procurement Details
-      purchaseDate: Date;
-      lastOrderQuantity: number;
-      purchasePrice: number;
-      supplierName: string;
 
+      // Sales
+      forSale: boolean;
       // Audit & Usage
       usageRate: number;
       wastage: number;
       auditDate: Date;
       auditNotes?: string;
-      // Stock Change History
-      stockChangeHistory: Array<{
-        date: Date;
-        previousQuantity: number;
-        newQuantity: number;
-        changeType: "purchase" | "sale" | "adjustment" | "wastage";
-        reason?: string;
-        documentReference?: string; // PO number, SO number, etc
-        userId: string;
-      }>;
     };
     indexes: { "by-sku": string };
+  };
+
+  requisition: {};
+  inventoryHistory: {
+    key: string;
+    value: {
+      id: string;
+      invId: string;
+      state: "inflow" | "outflow";
+      vendorId: string;
+    };
+    indexes: { "by-sku": string };
+  };
+
+  purchaseOrders: {
+    key: string;
+    value: {
+      id: string;
+      vendorId: string;
+      vendorName: string;
+      status: "pending" | "approved" | "received" | "cancelled";
+      items: Array<{
+        id: string;
+        name: string;
+        quantity: number;
+        price: number;
+      }>;
+      totalAmount: number;
+      createdAt: Date;
+      expectedDelivery: string;
+    };
+    indexes: { "by-status": string };
   };
   vendors: {
     key: string;
@@ -172,6 +213,12 @@ export const initDB = async () => {
       // Create sales store
       const salesStore = db.createObjectStore("sales", { keyPath: "id" });
       salesStore.createIndex("by-date", "timestamp");
+
+      // Create purchase orders store
+      const purchaseOrdersStore = db.createObjectStore("purchaseOrders", {
+        keyPath: "id",
+      });
+      purchaseOrdersStore.createIndex("by-status", "status");
     },
   });
   return db;

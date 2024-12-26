@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { db } from "../lib/db";
 import { AlertTriangle, Plus, X, Eye, Edit2, BarChart2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import Modal from "../components/ui/Modal";
+import { Table } from "../components/ui/Table";
+import Select from "../components/ui/Select";
 
 export function Inventory() {
   const [items, setItems] = useState<any[]>([]);
@@ -138,59 +141,37 @@ export function Inventory() {
       </div>
 
       <div className="bg-white shadow-sm rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Item
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                SKU
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Quantity
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Last Updated
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {items.map((item) => (
-              <tr key={item.id}>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">
-                    {item.name}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-500">{item.sku}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{item.quantity}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {item.quantity <= item.minQuantity ? (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                      <AlertTriangle className="h-3 w-3 mr-1" />
-                      Low Stock
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      In Stock
-                    </span>
-                  )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(item.lastUpdated).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
+        <Table
+          data={items}
+          columns={[
+            { key: "name", label: "Item" },
+            { key: "sku", label: "SKU" },
+            { key: "quantity", label: "Quantity" },
+            {
+              key: "quantity",
+              label: "Status",
+              render: (item) =>
+                item.quantity <= item.minQuantity ? (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    <AlertTriangle className="h-3 w-3 mr-1" />
+                    Low Stock
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    In Stock
+                  </span>
+                ),
+            },
+            {
+              key: "lastUpdated",
+              label: "Last Updated",
+              render: (item) => new Date(item.lastUpdated).toLocaleDateString(),
+            },
+            {
+              key: "actions",
+              label: "Actions",
+              render: (item) => (
+                <div className="text-right text-sm font-medium space-x-3">
                   <button
                     onClick={() => {
                       setSelectedItem(item);
@@ -215,105 +196,76 @@ export function Inventory() {
                   >
                     <BarChart2 className="h-4 w-4 inline" />
                   </Link>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        {isAddModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white rounded-lg p-6 w-full max-w-4xl">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Add New Item</h2>
-                <button
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-              <AddItemForm
-                onSubmit={handleAddItem}
-                onCancel={() => setIsAddModalOpen(false)}
-                vendors={vendors}
-              />
-            </div>
-          </div>
-        )}
-
-        {isEditModalOpen && selectedItem && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white rounded-lg p-6 w-full max-w-4xl">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">Edit Item</h2>
-                <button
-                  onClick={() => {
-                    setIsEditModalOpen(false);
-                    setSelectedItem(null);
-                  }}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-              <AddItemForm
-                onSubmit={handleEditItem}
-                onCancel={() => {
-                  setIsEditModalOpen(false);
-                  setSelectedItem(null);
-                }}
-                initialData={selectedItem}
-                vendors={vendors}
-              />
-            </div>
-          </div>
-        )}
-
-        {isViewModalOpen && selectedItem && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white rounded-lg p-6 w-full max-w-4xl">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">View Item Details</h2>
-                <button
-                  onClick={() => {
-                    setIsViewModalOpen(false);
-                    setSelectedItem(null);
-                  }}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                {Object.entries(selectedItem)
-                  .filter(
-                    ([key]) =>
-                      !["id", "stockChangeHistory"].includes(key) &&
-                      selectedItem[key] !== undefined
-                  )
-                  .map(([key, value]) => (
-                    <div key={key}>
-                      <label className="block text-sm font-medium text-gray-700">
-                        {key
-                          .replace(/([A-Z])/g, " $1")
-                          .replace(/^./, (str) => str.toUpperCase())}
-                      </label>
-                      <div className="mt-1 text-sm text-gray-900">
-                        {key.toLowerCase().includes("date")
-                          ? new Date(value as string).toLocaleString()
-                          : typeof value === "boolean"
-                          ? value
-                            ? "Yes"
-                            : "No"
-                          : String(value)}
-                      </div>
+                </div>
+              ),
+            },
+          ]}
+        />
+        <Modal
+          title="Add New Item"
+          handleClose={() => setIsAddModalOpen(false)}
+          isOpen={isAddModalOpen}
+        >
+          <AddItemForm
+            onSubmit={handleAddItem}
+            onCancel={() => setIsAddModalOpen(false)}
+            vendors={vendors}
+          />
+        </Modal>
+        <Modal
+          title="Edit Item"
+          handleClose={() => {
+            setIsEditModalOpen(false);
+            setSelectedItem(null);
+          }}
+          isOpen={isEditModalOpen && selectedItem}
+        >
+          <AddItemForm
+            onSubmit={handleEditItem}
+            onCancel={() => {
+              setIsEditModalOpen(false);
+              setSelectedItem(null);
+            }}
+            initialData={selectedItem}
+            vendors={vendors}
+          />
+        </Modal>
+        <Modal
+          title="View Item"
+          handleClose={() => {
+            setIsViewModalOpen(false);
+            setSelectedItem(null);
+          }}
+          isOpen={isViewModalOpen && selectedItem}
+        >
+          <div className="grid grid-cols-2 gap-4">
+            {selectedItem &&
+              Object.entries(selectedItem)
+                .filter(
+                  ([key]) =>
+                    !["id", "stockChangeHistory"].includes(key) &&
+                    selectedItem[key] !== undefined
+                )
+                .map(([key, value]) => (
+                  <div key={key}>
+                    <label className="block text-sm font-medium text-gray-700">
+                      {key
+                        .replace(/([A-Z])/g, " $1")
+                        .replace(/^./, (str) => str.toUpperCase())}
+                    </label>
+                    <div className="mt-1 text-sm text-gray-900">
+                      {key.toLowerCase().includes("date")
+                        ? new Date(value as string).toLocaleString()
+                        : typeof value === "boolean"
+                        ? value
+                          ? "Yes"
+                          : "No"
+                        : String(value)}
                     </div>
-                  ))}
-              </div>
-            </div>
+                  </div>
+                ))}
           </div>
-        )}
+        </Modal>
       </div>
     </div>
   );
@@ -352,6 +304,7 @@ function AddItemForm({
     wastage: number;
     auditDate: Date;
     auditNotes?: string;
+    forSale: boolean;
   }) => void;
   onCancel: () => void;
   initialData?: Partial<{
@@ -380,6 +333,7 @@ function AddItemForm({
     wastage: number;
     auditDate: Date;
     auditNotes?: string;
+    forSale: boolean;
   }>;
 }) {
   const [formData, setFormData] = useState({
@@ -442,9 +396,18 @@ function AddItemForm({
           <label className="block text-sm font-medium text-gray-700">
             Quantity
           </label>
-          <div className="mt-1 p-1 block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm">
-            {formData.quantity}
-          </div>
+          <input
+            type="number"
+            min="0"
+            className="mt-1 p-1  block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            value={formData.quantity}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                quantity: parseInt(e.target.value),
+              })
+            }
+          />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">
@@ -518,39 +481,35 @@ function AddItemForm({
             <option value="Other">Other</option>
           </select>
         </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Unit of Measure
-          </label>
-          <select
-            required
-            value={formData.uom}
-            onChange={(e) => setFormData({ ...formData, uom: e.target.value })}
-            className="mt-1 p-1 block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          >
-            <option value="">Select a unit</option>
-            <option value="ea">Each (ea)</option>
-            <option value="kg">Kilogram (kg)</option>
-            <option value="g">Gram (g)</option>
-            <option value="lb">Pound (lb)</option>
-            <option value="oz">Ounce (oz)</option>
-            <option value="l">Liter (l)</option>
-            <option value="ml">Milliliter (ml)</option>
-            <option value="gal">Gallon (gal)</option>
-            <option value="qt">Quart (qt)</option>
-            <option value="pt">Pint (pt)</option>
-            <option value="fl oz">Fluid Ounce (fl oz)</option>
-            <option value="box">Box</option>
-            <option value="case">Case</option>
-            <option value="pack">Pack</option>
-            <option value="bag">Bag</option>
-            <option value="roll">Roll</option>
-            <option value="sheet">Sheet</option>
-            <option value="pair">Pair</option>
-            <option value="nylon">Nylon</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
+        <Select
+          label="Unit of Measure"
+          required
+          value={formData.uom}
+          onChange={(e) => setFormData({ ...formData, uom: e.target.value })}
+          options={[
+            { value: "", label: "Select a unit" },
+            { value: "ea", label: "Each (ea)" },
+            { value: "kg", label: "Kilogram (kg)" },
+            { value: "g", label: "Gram (g)" },
+            { value: "lb", label: "Pound (lb)" },
+            { value: "oz", label: "Ounce (oz)" },
+            { value: "l", label: "Liter (l)" },
+            { value: "ml", label: "Milliliter (ml)" },
+            { value: "gal", label: "Gallon (gal)" },
+            { value: "qt", label: "Quart (qt)" },
+            { value: "pt", label: "Pint (pt)" },
+            { value: "fl oz", label: "Fluid Ounce (fl oz)" },
+            { value: "box", label: "Box" },
+            { value: "case", label: "Case" },
+            { value: "pack", label: "Pack" },
+            { value: "bag", label: "Bag" },
+            { value: "roll", label: "Roll" },
+            { value: "sheet", label: "Sheet" },
+            { value: "pair", label: "Pair" },
+            { value: "nylon", label: "Nylon" },
+            { value: "other", label: "Other" },
+          ]}
+        />
         <div>
           <label className="block text-sm font-medium text-gray-700">
             Reorder Level
@@ -680,6 +639,20 @@ function AddItemForm({
             checked={formData.isPerishable}
             onChange={(e) =>
               setFormData({ ...formData, isPerishable: e.target.checked })
+            }
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            For Sale
+          </label>
+          <input
+            type="checkbox"
+            className="mt-1 p-1 rounded bg-gray-100 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            checked={formData.forSale}
+            onChange={(e) =>
+              setFormData({ ...formData, forSale: e.target.checked })
             }
           />
         </div>

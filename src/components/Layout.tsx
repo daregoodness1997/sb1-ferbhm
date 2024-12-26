@@ -23,7 +23,6 @@ export function Layout() {
             Inventory Pro
           </h1>
         </div>
-
         <nav className="mt-8">
           <NavLink to="/" icon={<Package />} active={location.pathname === "/"}>
             Inventory
@@ -48,6 +47,14 @@ export function Layout() {
             active={location.pathname === "/orders"}
           >
             Purchase Orders
+          </NavLink>
+
+          <NavLink
+            to="/menu"
+            icon={<Package />}
+            active={location.pathname === "/menu"}
+          >
+            Menu
           </NavLink>
           <NavLink
             to="/pos"

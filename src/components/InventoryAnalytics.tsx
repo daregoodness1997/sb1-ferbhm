@@ -8,6 +8,8 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
+  Bar,
+  BarChart,
 } from "recharts";
 
 interface AnalyticsProps {
@@ -47,19 +49,28 @@ export function InventoryAnalytic({ itemId }: AnalyticsProps) {
           <div>
             <p className="text-sm text-gray-500">Average Daily Sales</p>
             <p className="text-xl font-medium">
-              {predictions.averageDailySales.toFixed(2)} units
+              {predictions.averageDailySales
+                ? predictions.averageDailySales.toFixed(2)
+                : 0}{" "}
+              units
             </p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Predicted Weekly Need</p>
             <p className="text-xl font-medium">
-              {predictions.predictedWeeklyNeed.toFixed(2)} units
+              {predictions.predictedWeeklyNeed
+                ? predictions.predictedWeeklyNeed.toFixed(2)
+                : 0}{" "}
+              units
             </p>
           </div>
           <div>
             <p className="text-sm text-gray-500">Recommended Reorder Point</p>
             <p className="text-xl font-medium">
-              {predictions.recommendedReorderPoint} units
+              {predictions.recommendedReorderPoint
+                ? predictions.recommendedReorderPoint.toFixed(2)
+                : 0}{" "}
+              units
             </p>
           </div>
           <div>
@@ -81,19 +92,14 @@ export function InventoryAnalytic({ itemId }: AnalyticsProps) {
 
       <div className="bg-white p-6 rounded-lg shadow">
         <h3 className="text-lg font-medium mb-4">Seasonal Trends</h3>
-        <LineChart width={600} height={300} data={trendData}>
+        <BarChart width={600} height={300} data={trendData}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="month" />
           <YAxis />
           <Tooltip />
           <Legend />
-          <Line
-            type="monotone"
-            dataKey="quantity"
-            stroke="#8884d8"
-            name="Sales Volume"
-          />
-        </LineChart>
+          <Bar dataKey="quantity" fill="#8884d8" name="Sales Volume" />
+        </BarChart>
       </div>
     </div>
   );
