@@ -46,7 +46,7 @@ const InventoryModule = () => {
       key: "actions",
       label: "Actions",
       render: (item) => (
-        <div className="text-left text-sm font-medium space-x-3">
+        <div className="text-right text-sm font-medium space-x-3">
           <button
             onClick={() => {
               setView("view");

@@ -12,6 +12,7 @@ import { StockReceiptFormWrapper } from "./components/StockReceiptFormWrapper";
 import { InventoryItem } from "./pages/InventoryItem";
 import { Menu } from "./pages/Menu";
 import Products from "./pages/Products";
+import { Categories } from "./pages/Categories";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Inventory />} />
           <Route path="inventory" element={<Inventory />} />
+          <Route path="categories" element={<Categories />} />
           <Route path="products" element={<Products />} />
           <Route path="inventory/:id" element={<InventoryItem />} />
           <Route path="vendors" element={<Vendors />} />

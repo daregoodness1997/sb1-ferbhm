@@ -1,39 +1,38 @@
 import AppLayout from "@/components/app-layout";
 import Modal from "@/components/ui/Modal";
-import { AlertTriangle, BarChart2, Edit2, Eye, Plus } from "lucide-react";
+import { AlertTriangle, Edit2, Eye, Plus } from "lucide-react";
 import React, { useState, memo } from "react";
-import useInventory from "./hooks";
 import { Table } from "@/components/ui/Table";
-import { Link } from "react-router-dom";
-import { inventoryFields } from "./constant";
 import Form from "@/components/ui/Form";
 import DetailedVew from "@/components/detailed-vew";
+import useCategory from "./hooks";
+import { categoriesFields } from "./constant";
 
 type View = "create" | "view" | "edit";
 
-const InventoryModule = () => {
+const CategoriesModule = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { items, vendors, loading, handleAddItem, handleEditItem } =
-    useInventory();
+  const { items, loading, handleAddItem, handleEditItem } = useCategory();
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [view, setView] = useState<View>("create");
 
   const columns = [
-    { key: "name", label: "Item" },
-    { key: "sku", label: "SKU" },
-    { key: "quantity", label: "Quantity" },
     {
-      key: "quantity",
+      key: "categoryName",
+      label: "Category",
+    },
+    {
+      key: "status",
       label: "Status",
       render: (item) =>
-        item.quantity <= item.minQuantity ? (
+        item.status === "in-active" ? (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
             <AlertTriangle className="h-3 w-3 mr-1" />
-            Low Stock
+            Inactive
           </span>
         ) : (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-            In Stock
+            Active
           </span>
         ),
     },
@@ -67,12 +66,6 @@ const InventoryModule = () => {
           >
             <Edit2 className="h-4 w-4 inline" />
           </button>
-          <Link
-            to={`/inventory/${item.id}`}
-            className="text-purple-600 hover:text-purple-900"
-          >
-            <BarChart2 className="h-4 w-4 inline" />
-          </Link>
         </div>
       ),
     },
@@ -87,15 +80,15 @@ const InventoryModule = () => {
   return (
     <div>
       <AppLayout
-        title="Current Stock"
-        description="Manage your inventory items and stock levels"
+        title="Categories"
+        description="Manage your categories"
         actions={
           <button
             onClick={() => setIsOpen(true)}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700"
           >
             <Plus className="h-4 w-4" />
-            Add Item
+            Add Category
           </button>
         }
       >
@@ -113,7 +106,7 @@ const InventoryModule = () => {
               <DetailedVew selectedItem={selectedItem} />
             ) : (
               <Form
-                fields={inventoryFields(vendors)}
+                fields={categoriesFields}
                 onSubmit={view === "create" ? handleAddItem : handleEditItem}
                 onCancel={() => setIsOpen(false)}
                 initialData={view === "edit" ? selectedItem : []}
@@ -126,4 +119,4 @@ const InventoryModule = () => {
   );
 };
 
-export default memo(InventoryModule);
+export default memo(CategoriesModule);

@@ -29,11 +29,18 @@ export function Layout() {
             Inventory
           </NavLink>
           <NavLink
-            to="/"
+            to="/products"
             icon={<BookCopy />}
             active={location.pathname === "/products"}
           >
             Products
+          </NavLink>
+          <NavLink
+            to="/categories"
+            icon={<BookCopy />}
+            active={location.pathname === "/categories"}
+          >
+            Categories
           </NavLink>
           <NavLink
             to="/vendors"

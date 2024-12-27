@@ -161,7 +161,7 @@ interface InventoryDB extends DBSchema {
       createdAt: Date;
       syncStatus: "pending" | "synced" | "error";
     };
-    indexes: { "by-status": string; "by-date": string };
+    indexes: { "by-transactionID": string };
   };
   sales_transactions: {
     key: string;
@@ -262,8 +262,10 @@ export const initDB = async () => {
           keyPath: "transactionID",
         }
       );
-      inventoryTransactionsStore.createIndex("by-status", "syncStatus");
-      inventoryTransactionsStore.createIndex("by-date", "createdAt");
+      inventoryTransactionsStore.createIndex(
+        "by-transactionID",
+        "transactionID"
+      );
 
       // Create sales_transactions store
       const salesTransactionsStore = db.createObjectStore(
