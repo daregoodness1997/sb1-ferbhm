@@ -49,7 +49,6 @@ interface InventoryDB extends DBSchema {
       activityID: string;
       actionedBy: string;
       actionType: string;
-      lastUpdated: Date;
       createdAt: Date;
       syncStatus: "pending" | "synced" | "error";
     };

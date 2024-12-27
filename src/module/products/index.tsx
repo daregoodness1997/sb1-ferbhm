@@ -93,6 +93,7 @@ const ProductModule = () => {
       )?.categoryName,
     }),
   };
+  console.log(reformedSelectedItem);
 
   return (
     <div>
@@ -101,7 +102,11 @@ const ProductModule = () => {
         description="Manage your products"
         actions={
           <button
-            onClick={() => setIsOpen(true)}
+            onClick={() => {
+              setIsOpen(true);
+              setSelectedItem({});
+              setView("create");
+            }}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700"
           >
             <Plus className="h-4 w-4" />
@@ -124,7 +129,11 @@ const ProductModule = () => {
             ) : (
               <Form
                 fields={productsFields(categories)}
-                onSubmit={view === "create" ? handleAddItem : handleEditItem}
+                onSubmit={
+                  view === "create"
+                    ? handleAddItem
+                    : (data) => handleEditItem(data, selectedItem.productID)
+                }
                 onCancel={() => setIsOpen(false)}
                 initialData={view === "edit" ? selectedItem : []}
               />

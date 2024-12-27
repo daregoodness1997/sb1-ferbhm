@@ -6,47 +6,52 @@ import { Table } from "@/components/ui/Table";
 import { Link } from "react-router-dom";
 import Form from "@/components/ui/Form";
 import DetailedVew from "@/components/detailed-vew";
-import useProduct from "./hooks";
 import { locationsFields } from "./constant";
+import useFetch from "@/hooks/use-fetch";
+import { db } from "@/lib/db";
+import { Badge } from "@/components/ui/Badge";
 
 type View = "create" | "view" | "edit";
 
-const LocationsModule = () => {
+const ActivityModule = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { items, loading, handleAddItem, handleEditItem } = useProduct();
+  const { items, loading } = useFetch("activities", db);
   const [selectedItem, setSelectedItem] = useState<any>({
     categoryID: "",
   });
   const [view, setView] = useState<View>("create");
 
   const columns = [
-    { key: "locationName", label: "Location" },
-    { key: "email", label: "email" },
+    { key: "locationID", label: "Location" },
+    { key: "actionedBy", label: "actionedBy" },
+    { key: "actionType", label: "Action Type" },
     {
       key: "status",
       label: "Status",
-      render: (item) =>
-        item.status === "in-active" ? (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-            <AlertTriangle className="h-3 w-3 mr-1" />
-            Inactive
-          </span>
-        ) : (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-            Active
-          </span>
-        ),
+      render: (item) => (
+        <Badge
+          variant={
+            item.syncStatus === "synced"
+              ? "success"
+              : item.syncStatus === "pending"
+              ? "warning"
+              : "error"
+          }
+        >
+          {item.syncStatus}
+        </Badge>
+      ),
     },
     {
-      key: "lastUpdated",
-      label: "Last Updated",
+      key: "createdAt",
+      label: "Created At",
       render: (item) => new Date(item.lastUpdated).toLocaleDateString(),
     },
     {
       key: "actions",
       label: "Actions",
       render: (item) => (
-        <div className="text-right text-sm font-medium space-x-3">
+        <div className="text-left text-sm font-medium space-x-3">
           <button
             onClick={() => {
               setView("view");
@@ -56,16 +61,6 @@ const LocationsModule = () => {
             className="text-gray-600 hover:text-gray-900"
           >
             <Eye className="h-4 w-4 inline" />
-          </button>
-          <button
-            onClick={() => {
-              setSelectedItem(item);
-              setIsOpen(true);
-              setView("edit");
-            }}
-            className="text-blue-600 hover:text-blue-900"
-          >
-            <Edit2 className="h-4 w-4 inline" />
           </button>
         </div>
       ),
@@ -81,17 +76,9 @@ const LocationsModule = () => {
   return (
     <div>
       <AppLayout
-        title="Products"
-        description="Manage your products"
-        actions={
-          <button
-            onClick={() => setIsOpen(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700"
-          >
-            <Plus className="h-4 w-4" />
-            Add Location
-          </button>
-        }
+        title="Activities"
+        description="Keep track of all your activities"
+        actions={<div></div>}
       >
         <div>
           <Table data={items} columns={columns} />
@@ -103,16 +90,7 @@ const LocationsModule = () => {
             }}
             isOpen={isOpen}
           >
-            {view === "view" ? (
-              <DetailedVew selectedItem={selectedItem} />
-            ) : (
-              <Form
-                fields={locationsFields}
-                onSubmit={view === "create" ? handleAddItem : handleEditItem}
-                onCancel={() => setIsOpen(false)}
-                initialData={view === "edit" ? selectedItem : []}
-              />
-            )}
+            <DetailedVew selectedItem={selectedItem} />
           </Modal>
         </div>
       </AppLayout>
@@ -120,4 +98,4 @@ const LocationsModule = () => {
   );
 };
 
-export default memo(LocationsModule);
+export default memo(ActivityModule);

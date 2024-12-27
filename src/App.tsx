@@ -14,6 +14,7 @@ import { Menu } from "./pages/Menu";
 import Products from "./pages/Products";
 import { Categories } from "./pages/Categories";
 import { Locations } from "./pages/Locations";
+import { Activities } from "./pages/Activities";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route path="categories" element={<Categories />} />
           <Route path="products" element={<Products />} />
           <Route path="locations" element={<Locations />} />
+          <Route path="activities" element={<Activities />} />
           <Route path="inventory/:id" element={<InventoryItem />} />
           <Route path="vendors" element={<Vendors />} />
           <Route path="transactions" element={<Transactions />} />

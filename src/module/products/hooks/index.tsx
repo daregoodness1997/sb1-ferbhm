@@ -7,12 +7,15 @@ const useProduct = () => {
   const { items, loading, error, refetch } = useFetch("products", db);
   const { items: categories } = useFetch("categories", db);
 
+  const locationID = localStorage.getItem("locationID") || "";
+
   async function handleAddItem(newItem: any) {
     try {
       const database = await db;
 
-      const tx = database.transaction(["products"], "readwrite");
+      const tx = database.transaction(["products", "activities"], "readwrite");
       const store = tx.objectStore("products");
+      const aStore = tx.objectStore("activities");
 
       const item = {
         ...newItem,
@@ -22,7 +25,17 @@ const useProduct = () => {
         syncStatus: "pending",
       };
 
+      const activity = {
+        locationID: locationID,
+        activityID: uuidv4(),
+        actionType: "product addition",
+        createdAt: new Date(),
+        actionedBy: "",
+        syncStatus: "pending",
+      };
+
       await store.add(item);
+      await aStore.add(activity);
 
       await tx.done;
 
@@ -32,20 +45,35 @@ const useProduct = () => {
     }
   }
 
-  async function handleEditItem(updatedItem: any) {
+  async function handleEditItem(updatedItem: any, id: string) {
     try {
       const database = await db;
-      const tx = database.transaction(["products"], "readwrite");
+      const tx = database.transaction(["products", "activities"], "readwrite");
       const store = tx.objectStore("products");
+      const aStore = tx.objectStore("activities");
 
       const item = {
         ...updatedItem,
+        productID: id,
         lastUpdated: new Date().toISOString(),
         status: "active",
-        syncStatus: "pending",
+        syncStatus: "pending" as "pending" | "synced" | "error",
+      };
+
+      console.log(item, "form items");
+
+      const activity = {
+        locationID: locationID,
+        activityID: uuidv4(),
+        actionType: "product editing",
+        createdAt: new Date(),
+        actionedBy: "",
+        syncStatus: "pending" as "pending" | "synced" | "error",
       };
 
       await store.put(item);
+      await aStore.add(activity);
+
       await tx.done;
 
       await refetch();

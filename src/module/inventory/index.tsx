@@ -114,7 +114,11 @@ const InventoryModule = () => {
             ) : (
               <Form
                 fields={inventoryFields(vendors)}
-                onSubmit={view === "create" ? handleAddItem : handleEditItem}
+                onSubmit={
+                  view === "create"
+                    ? handleAddItem
+                    : (data) => handleEditItem(data, selectedItem.productID)
+                }
                 onCancel={() => setIsOpen(false)}
                 initialData={view === "edit" ? selectedItem : []}
               />
