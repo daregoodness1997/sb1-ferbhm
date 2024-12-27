@@ -7,22 +7,21 @@ import { Link } from "react-router-dom";
 import Form from "@/components/ui/Form";
 import DetailedVew from "@/components/detailed-vew";
 import useProduct from "./hooks";
-import { productsFields } from "./constant";
+import { locationsFields } from "./constant";
 
 type View = "create" | "view" | "edit";
 
-const ProductModule = () => {
+const LocationsModule = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { items, categories, loading, handleAddItem, handleEditItem } =
-    useProduct();
+  const { items, loading, handleAddItem, handleEditItem } = useProduct();
   const [selectedItem, setSelectedItem] = useState<any>({
     categoryID: "",
   });
   const [view, setView] = useState<View>("create");
 
   const columns = [
-    { key: "name", label: "Item" },
-    { key: "sku", label: "SKU" },
+    { key: "locationName", label: "Location" },
+    { key: "email", label: "email" },
     {
       key: "status",
       label: "Status",
@@ -47,7 +46,7 @@ const ProductModule = () => {
       key: "actions",
       label: "Actions",
       render: (item) => (
-        <div className="text-left text-sm font-medium space-x-3">
+        <div className="text-right text-sm font-medium space-x-3">
           <button
             onClick={() => {
               setView("view");
@@ -68,12 +67,6 @@ const ProductModule = () => {
           >
             <Edit2 className="h-4 w-4 inline" />
           </button>
-          <Link
-            to={`/inventory/${item.id}`}
-            className="text-purple-600 hover:text-purple-900"
-          >
-            <BarChart2 className="h-4 w-4 inline" />
-          </Link>
         </div>
       ),
     },
@@ -84,15 +77,6 @@ const ProductModule = () => {
       <div className="flex justify-center items-center h-64">Loading...</div>
     );
   }
-
-  const reformedSelectedItem = {
-    ...selectedItem,
-    ...(selectedItem?.categoryID && {
-      categoryID: categories.find(
-        (category) => category.categoryID === selectedItem?.categoryID
-      )?.categoryName,
-    }),
-  };
 
   return (
     <div>
@@ -105,7 +89,7 @@ const ProductModule = () => {
             className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700"
           >
             <Plus className="h-4 w-4" />
-            Add Product
+            Add Location
           </button>
         }
       >
@@ -120,10 +104,10 @@ const ProductModule = () => {
             isOpen={isOpen}
           >
             {view === "view" ? (
-              <DetailedVew selectedItem={reformedSelectedItem} />
+              <DetailedVew selectedItem={selectedItem} />
             ) : (
               <Form
-                fields={productsFields(categories)}
+                fields={locationsFields}
                 onSubmit={view === "create" ? handleAddItem : handleEditItem}
                 onCancel={() => setIsOpen(false)}
                 initialData={view === "edit" ? selectedItem : []}
@@ -136,4 +120,4 @@ const ProductModule = () => {
   );
 };
 
-export default memo(ProductModule);
+export default memo(LocationsModule);

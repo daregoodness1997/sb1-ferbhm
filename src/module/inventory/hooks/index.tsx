@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { db } from "@/lib/db";
 import useFetch from "@/hooks/use-fetch";
+import { v4 as uuidv4 } from "uuid";
+
 const useInventory = () => {
   const { items, loading, error, refetch } = useFetch("inventory", db);
   const { items: vendors } = useFetch("inventory", db);
@@ -18,14 +20,14 @@ const useInventory = () => {
 
       const item = {
         ...newItem,
-        inventoryID: new Date().toISOString(),
+        inventoryID: uuidv4(),
         lastUpdated: new Date().toISOString(),
       };
 
       await store.add(item);
       await tstore.add({
         ...item,
-        transactionID: Date.now().toString(),
+        transactionID: uuidv4(),
         inventoryID: item.id,
         type: "purchase",
         quantity: item.quantity,
@@ -54,13 +56,12 @@ const useInventory = () => {
 
       const item = {
         ...updatedItem,
-        inventoryID: new Date().toISOString(),
         lastUpdated: new Date().toISOString(),
       };
 
       await store.put(item).then(() => {
         tstore.put({
-          transactionID: Date.now().toString(),
+          transactionID: uuidv4(),
           inventoryID: item.id,
           type: "purchase",
           quantity: item.quantity,

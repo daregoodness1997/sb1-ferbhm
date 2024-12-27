@@ -1,39 +1,29 @@
 import React, { useState, useEffect } from "react";
 import { db } from "@/lib/db";
 import useFetch from "@/hooks/use-fetch";
-const useInventory = () => {
-  const { items, loading, error, refetch } = useFetch("inventory", db);
-  const { items: vendors } = useFetch("inventory", db);
+import { v4 as uuidv4 } from "uuid";
+
+const useProduct = () => {
+  const { items, loading, error, refetch } = useFetch("products", db);
+  const { items: categories } = useFetch("categories", db);
 
   async function handleAddItem(newItem: any) {
     try {
       const database = await db;
 
-      const tx = database.transaction(
-        ["inventory", "inventory_transactions"],
-        "readwrite"
-      );
-      const store = tx.objectStore("inventory");
-      const tstore = tx.objectStore("inventory_transactions");
+      const tx = database.transaction(["products"], "readwrite");
+      const store = tx.objectStore("products");
 
       const item = {
         ...newItem,
-        inventoryID: new Date().toISOString(),
+        productID: uuidv4(),
         lastUpdated: new Date().toISOString(),
+        status: "active",
+        syncStatus: "pending",
       };
 
       await store.add(item);
-      await tstore.add({
-        ...item,
-        transactionID: Date.now().toString(),
-        inventoryID: item.id,
-        type: "purchase",
-        quantity: item.quantity,
-        lastUpdated: new Date(),
-        createdAt: new Date(),
-        syncStatus: "synced",
-        productID: "",
-      });
+
       await tx.done;
 
       await refetch();
@@ -45,31 +35,17 @@ const useInventory = () => {
   async function handleEditItem(updatedItem: any) {
     try {
       const database = await db;
-      const tx = database.transaction(
-        ["inventory", "inventory_transactions"],
-        "readwrite"
-      );
-      const store = tx.objectStore("inventory");
-      const tstore = tx.objectStore("inventory_transactions");
+      const tx = database.transaction(["products"], "readwrite");
+      const store = tx.objectStore("products");
 
       const item = {
         ...updatedItem,
-        inventoryID: new Date().toISOString(),
         lastUpdated: new Date().toISOString(),
+        status: "active",
+        syncStatus: "pending",
       };
 
-      await store.put(item).then(() => {
-        tstore.put({
-          transactionID: Date.now().toString(),
-          inventoryID: item.id,
-          type: "purchase",
-          quantity: item.quantity,
-          lastUpdated: new Date(),
-          createdAt: new Date(),
-          syncStatus: "synced",
-          productID: "",
-        });
-      });
+      await store.put(item);
       await tx.done;
 
       await refetch();
@@ -78,7 +54,7 @@ const useInventory = () => {
     }
   }
 
-  return { items, vendors, loading, handleAddItem, handleEditItem };
+  return { items, categories, loading, handleAddItem, handleEditItem };
 };
 
-export default useInventory;
+export default useProduct;

@@ -32,8 +32,7 @@ interface InventoryDB extends DBSchema {
     key: string;
     value: {
       locationID: string;
-      location: string;
-      invId: string;
+      locationName: string;
       email: string;
       address: string;
       status: "active" | "in-active";

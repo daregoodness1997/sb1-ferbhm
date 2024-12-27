@@ -43,6 +43,13 @@ export function Layout() {
             Categories
           </NavLink>
           <NavLink
+            to="/locations"
+            icon={<BookCopy />}
+            active={location.pathname === "/locations"}
+          >
+            Locations
+          </NavLink>
+          <NavLink
             to="/vendors"
             icon={<Users />}
             active={location.pathname === "/vendors"}

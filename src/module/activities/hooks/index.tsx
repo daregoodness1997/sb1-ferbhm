@@ -3,20 +3,22 @@ import { db } from "@/lib/db";
 import useFetch from "@/hooks/use-fetch";
 import { v4 as uuidv4 } from "uuid";
 
-const useCategory = () => {
-  const { items, loading, error, refetch } = useFetch("categories", db);
+const useProduct = () => {
+  const { items, loading, error, refetch } = useFetch("locations", db);
 
   async function handleAddItem(newItem: any) {
     try {
       const database = await db;
 
-      const tx = database.transaction(["categories"], "readwrite");
-      const store = tx.objectStore("categories");
+      const tx = database.transaction(["locations"], "readwrite");
+      const store = tx.objectStore("locations");
 
       const item = {
         ...newItem,
-        categoryID: uuidv4(),
+        locationID: uuidv4(),
         lastUpdated: new Date().toISOString(),
+        status: "active",
+        syncStatus: "pending",
       };
 
       await store.add(item);
@@ -32,16 +34,17 @@ const useCategory = () => {
   async function handleEditItem(updatedItem: any) {
     try {
       const database = await db;
-      const tx = database.transaction(["categories"], "readwrite");
-      const store = tx.objectStore("categories");
+      const tx = database.transaction(["locations"], "readwrite");
+      const store = tx.objectStore("locations");
 
       const item = {
         ...updatedItem,
         lastUpdated: new Date().toISOString(),
+        status: "active",
+        syncStatus: "pending",
       };
 
       await store.put(item);
-
       await tx.done;
 
       await refetch();
@@ -53,4 +56,4 @@ const useCategory = () => {
   return { items, loading, handleAddItem, handleEditItem };
 };
 
-export default useCategory;
+export default useProduct;

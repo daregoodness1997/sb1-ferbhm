@@ -1,7 +1,8 @@
+import ProductsModule from "@/module/products";
 import React from "react";
 
 const Products = () => {
-  return <div>Products</div>;
+  return <ProductsModule />;
 };
 
 export default Products;
