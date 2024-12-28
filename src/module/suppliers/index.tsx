@@ -2,78 +2,48 @@ import AppLayout from "@/components/app-layout";
 import Modal from "@/components/ui/Modal";
 import { AlertTriangle, BarChart2, Edit2, Eye, Plus } from "lucide-react";
 import React, { useState, memo } from "react";
-import useInventory from "./hooks";
 import { Table } from "@/components/ui/Table";
 import { Link } from "react-router-dom";
-import { inventoryFields } from "./constant";
 import Form from "@/components/ui/Form";
 import DetailedVew from "@/components/detailed-vew";
+import useProduct from "./hooks";
+import { customersFields } from "./constant";
 
 type View = "create" | "view" | "edit";
 
-const InventoryModule = () => {
+const SuppliersModule = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const {
-    items,
-    products,
-    categories,
-    loading,
-    handleAddItem,
-    handleEditItem,
-  } = useInventory();
-  const [selectedItem, setSelectedItem] = useState<any>({ minQuantity: 0 });
+  const { items, loading, handleAddItem, handleEditItem } = useProduct();
+  const [selectedItem, setSelectedItem] = useState<any>({
+    customerID: "",
+  });
   const [view, setView] = useState<View>("create");
 
-  const getProduct = (id) => products.find((item) => item.productID === id);
-
-  const categoryID = categories.find(
-    (item) =>
-      item.categoryID === getProduct(selectedItem?.productID || "")?.catergoryID
-  )?.categoryName;
-
-  const reformedSelectedItem = {
-    ...selectedItem,
-    ...(selectedItem?.categoryID && {
-      categoryID: categories.find(
-        (category) => category.categoryID === selectedItem?.categoryID
-      )?.categoryName,
-    }),
-  };
-
   const columns = [
+    { key: "supplierName", label: "Supplier Name" },
+    { key: "contactPerson", label: "Contact Person" },
+    { key: "email", label: "Contact Email" },
+    { key: "phone", label: "Contact Phone" },
+    { key: "website", label: "website" },
     {
-      key: "productID",
-      label: "Product",
-      render: (item) =>
-        getProduct(item?.productID || "")?.productName ||
-        getProduct(item?.productID || "")?.name,
-    },
-    { key: "quantity", label: "Quantity" },
-    { key: "minQuantity", label: "Min. Quantity" },
-    {
-      key: "quantity",
+      key: "status",
       label: "Status",
       render: (item) =>
-        item.quantity === 0 ? (
+        item.status === "in-active" ? (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
             <AlertTriangle className="h-3 w-3 mr-1" />
-            Out of Stock
-          </span>
-        ) : item.quantity <= item.minQuantity ? (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 orange-red-800">
-            <AlertTriangle className="h-3 w-3 mr-1" />
-            Low Stock
+            Inactive
           </span>
         ) : (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-            In Stock
+            Active
           </span>
         ),
     },
     {
       key: "lastUpdated",
       label: "Last Updated",
-      render: (item) => new Date(item.lastUpdated).toLocaleString(),
+      render: (item) => new Date(item.lastUpdated).toLocaleDateString(),
     },
     {
       key: "actions",
@@ -90,13 +60,16 @@ const InventoryModule = () => {
           >
             <Eye className="h-4 w-4 inline" />
           </button>
-
-          <Link
-            to={`/inventory/${item.id}`}
-            className="text-purple-600 hover:text-purple-900"
+          <button
+            onClick={() => {
+              setSelectedItem(item);
+              setIsOpen(true);
+              setView("edit");
+            }}
+            className="text-blue-600 hover:text-blue-900"
           >
-            <BarChart2 className="h-4 w-4 inline" />
-          </Link>
+            <Edit2 className="h-4 w-4 inline" />
+          </button>
         </div>
       ),
     },
@@ -108,11 +81,15 @@ const InventoryModule = () => {
     );
   }
 
+  const reformedSelectedItem = {
+    ...selectedItem,
+  };
+
   return (
     <div>
       <AppLayout
-        title="Current Stock"
-        description="Manage your inventory items and stock levels"
+        title="Suppliers"
+        description="Manage your suppliers"
         actions={
           <button
             onClick={() => {
@@ -123,7 +100,7 @@ const InventoryModule = () => {
             className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700"
           >
             <Plus className="h-4 w-4" />
-            Add Item
+            Add Supplier
           </button>
         }
       >
@@ -138,13 +115,17 @@ const InventoryModule = () => {
             isOpen={isOpen}
           >
             {view === "view" ? (
-              <DetailedVew selectedItem={selectedItem} />
+              <DetailedVew selectedItem={reformedSelectedItem} />
             ) : (
               <Form
-                fields={inventoryFields(products, categories)}
-                onSubmit={handleAddItem}
+                fields={customersFields}
+                onSubmit={
+                  view === "create"
+                    ? handleAddItem
+                    : (data) => handleEditItem(data, selectedItem.supplierID)
+                }
                 onCancel={() => setIsOpen(false)}
-                initialData={selectedItem}
+                initialData={view === "edit" ? selectedItem : []}
               />
             )}
           </Modal>
@@ -154,4 +135,4 @@ const InventoryModule = () => {
   );
 };
 
-export default memo(InventoryModule);
+export default memo(SuppliersModule);

@@ -5,7 +5,7 @@ interface InventoryDB extends DBSchema {
     key: string;
     value: {
       productID: string;
-      productName: string;
+      name: string;
       catergoryID: string;
       sku: string;
       status: "active" | "in-active";
@@ -62,6 +62,7 @@ interface InventoryDB extends DBSchema {
       customerName: string;
       customerEmail: string;
       customerPhone: string;
+      status: "active" | "in-active";
       lastUpdated: Date;
       createdAt: Date;
       syncStatus: "pending" | "synced" | "error";
@@ -74,12 +75,11 @@ interface InventoryDB extends DBSchema {
     value: {
       supplierID: string;
       supplierName: string;
-      contactInfo: {
-        contactPerson?: string;
-        phone?: string;
-        email?: string;
-        address?: string;
-      };
+      contactPerson?: string;
+      phone?: string;
+      email?: string;
+      address?: string;
+      status: "active" | "in-active";
       website?: string;
       paymentTerms: string;
       lastUpdated: Date;
@@ -87,6 +87,54 @@ interface InventoryDB extends DBSchema {
       syncStatus: "pending" | "synced" | "error";
     };
     indexes: { "by-supplierID": string };
+  };
+
+  inventory: {
+    key: string;
+    value: {
+      inventoryID: string;
+      productID: string;
+      quantity: number;
+      minQuantity: number;
+      categoryID: string;
+      locationID: string;
+      createdBy: string;
+      lastUpdated: Date;
+      createdAt: Date;
+      syncStatus: "pending" | "synced" | "error";
+    };
+    indexes: { "by-inventoryID": string };
+  };
+
+  purchaseOrders: {
+    key: string;
+    value: {
+      id: string;
+      vendorId: string;
+      vendorName: string;
+      status: "pending" | "approved" | "received" | "cancelled";
+      products: { productID: string; quantity: number; amount: number }[];
+      totalAmount: number;
+      createdAt: Date;
+      expectedDelivery: string;
+      syncStatus: "pending" | "synced" | "error";
+    };
+    indexes: { "by-status": string };
+  };
+
+  inventory_transactions: {
+    key: string;
+    value: {
+      transactionID: string;
+      type: "purchase" | "requisition";
+      inventoryID: string;
+      productID: string;
+      quantity: number;
+      lastUpdated: Date;
+      createdAt: Date;
+      syncStatus: "pending" | "synced" | "error";
+    };
+    indexes: { "by-transactionID": string };
   };
 
   sales: {
@@ -117,50 +165,6 @@ interface InventoryDB extends DBSchema {
     indexes: { "by-saleItemId": string };
   };
 
-  inventory: {
-    key: string;
-    value: {
-      inventoryID: string;
-      productID: string;
-      quantityInStock: number;
-      category: string;
-      lastUpdated: Date;
-      createdAt: Date;
-      syncStatus: "pending" | "synced" | "error";
-    };
-    indexes: { "by-inventoryID": string };
-  };
-
-  purchaseOrders: {
-    key: string;
-    value: {
-      id: string;
-      vendorId: string;
-      vendorName: string;
-      status: "pending" | "approved" | "received" | "cancelled";
-      productIDs: string[];
-      totalAmount: number;
-      createdAt: Date;
-      expectedDelivery: string;
-      syncStatus: "pending" | "synced" | "error";
-    };
-    indexes: { "by-status": string };
-  };
-
-  inventory_transactions: {
-    key: string;
-    value: {
-      transactionID: string;
-      type: "purchase" | "requisition";
-      inventoryID: string;
-      productID: string;
-      quantity: number;
-      lastUpdated: Date;
-      createdAt: Date;
-      syncStatus: "pending" | "synced" | "error";
-    };
-    indexes: { "by-transactionID": string };
-  };
   sales_transactions: {
     key: string;
     value: {

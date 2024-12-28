@@ -21,7 +21,7 @@ export function Layout() {
         <div className="p-4">
           <h1 className="text-xl font-bold flex items-center gap-2">
             <Package className="h-6 w-6" />
-            Inventory Pro
+            Demeteri Pro
           </h1>
         </div>
         <nav className="mt-8">
@@ -51,17 +51,24 @@ export function Layout() {
           </NavLink>
           <NavLink
             to="/activities"
-            icon={<BookCopy />}
+            icon={<Activity />}
             active={location.pathname === "/activities"}
           >
             Activities
           </NavLink>
           <NavLink
-            to="/vendors"
+            to="/customers"
             icon={<Users />}
-            active={location.pathname === "/vendors"}
+            active={location.pathname === "/customers"}
           >
-            Vendors
+            Customers
+          </NavLink>
+          <NavLink
+            to="/suppliers"
+            icon={<Users />}
+            active={location.pathname === "/suppliers"}
+          >
+            Suppliers
           </NavLink>
           <NavLink
             to="/transactions"
@@ -175,17 +182,31 @@ function NavLink({
 function getPageTitle(pathname: string): string {
   switch (pathname) {
     case "/":
-      return "Inventory";
-    case "/vendors":
-      return "Vendors";
+      return "Dashboard";
+    case "/products":
+      return "Products";
+    case "/categories":
+      return "Categories";
+    case "/locations":
+      return "Locations";
+    case "/activities":
+      return "Activities";
+    case "/customers":
+      return "Customers";
+    case "/supliers":
+      return "Suppliers";
     case "/transactions":
       return "Transactions";
     case "/orders":
       return "Purchase Orders";
+    case "/menu":
+      return "Menu";
     case "/pos":
       return "Point of Sale";
     case "/analytics":
       return "Analytics";
+    case "/stock-receipts":
+      return "Stock Receipts";
     default:
       return "Inventory Management";
   }

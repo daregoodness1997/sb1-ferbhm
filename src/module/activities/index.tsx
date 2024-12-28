@@ -22,8 +22,6 @@ const ActivityModule = () => {
   const [view, setView] = useState<View>("create");
 
   const columns = [
-    { key: "locationID", label: "Location" },
-    { key: "actionedBy", label: "actionedBy" },
     { key: "actionType", label: "Action Type" },
     {
       key: "status",
@@ -45,8 +43,11 @@ const ActivityModule = () => {
     {
       key: "createdAt",
       label: "Created At",
-      render: (item) => new Date(item.lastUpdated).toLocaleDateString(),
+      render: (item) => new Date(item.createdAt).toLocaleString(),
     },
+    { key: "locationID", label: "Location" },
+    { key: "actionedBy", label: "actionedBy" },
+
     {
       key: "actions",
       label: "Actions",

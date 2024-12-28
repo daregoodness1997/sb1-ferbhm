@@ -15,6 +15,8 @@ import Products from "./pages/Products";
 import { Categories } from "./pages/Categories";
 import { Locations } from "./pages/Locations";
 import { Activities } from "./pages/Activities";
+import { Customers } from "./pages/Customers";
+import { Suppliers } from "./pages/Suppliers";
 
 function App() {
   return (
@@ -27,6 +29,8 @@ function App() {
           <Route path="products" element={<Products />} />
           <Route path="locations" element={<Locations />} />
           <Route path="activities" element={<Activities />} />
+          <Route path="customers" element={<Customers />} />
+          <Route path="suppliers" element={<Suppliers />} />
           <Route path="inventory/:id" element={<InventoryItem />} />
           <Route path="vendors" element={<Vendors />} />
           <Route path="transactions" element={<Transactions />} />

@@ -5,37 +5,83 @@ import { v4 as uuidv4 } from "uuid";
 
 const useInventory = () => {
   const { items, loading, error, refetch } = useFetch("inventory", db);
-  const { items: vendors } = useFetch("inventory", db);
+  const { items: products } = useFetch("products", db);
+  const { items: categories } = useFetch("categories", db);
+  const { items: inventory } = useFetch("inventory", db);
 
   async function handleAddItem(newItem: any) {
     try {
       const database = await db;
 
       const tx = database.transaction(
-        ["inventory", "inventory_transactions"],
+        ["inventory", "inventory_transactions", "activities"],
         "readwrite"
       );
       const store = tx.objectStore("inventory");
       const tstore = tx.objectStore("inventory_transactions");
+      const aStore = tx.objectStore("activities");
 
-      const item = {
-        ...newItem,
-        inventoryID: uuidv4(),
-        lastUpdated: new Date().toISOString(),
-      };
+      const existingItem = inventory.find(
+        (item) => item.productID === newItem.productID
+      );
 
-      await store.add(item);
-      await tstore.add({
-        ...item,
-        transactionID: uuidv4(),
-        inventoryID: item.id,
-        type: "purchase",
-        quantity: item.quantity,
-        lastUpdated: new Date(),
-        createdAt: new Date(),
-        syncStatus: "synced",
-        productID: "",
-      });
+      if (existingItem) {
+        existingItem.quantity = Number(newItem.quantity)
+          ? Number(existingItem.quantity) + Number(newItem.quantity)
+          : Number(existingItem.quantity) || 0;
+        existingItem.minQuantity = newItem.minQuantity
+          ? newItem.minQuantity
+          : existingItem.minQuantity;
+        await store.put(existingItem);
+        await tstore.add({
+          transactionID: uuidv4(),
+          inventoryID: existingItem.inventoryID,
+          productID: existingItem.productID,
+          quantity: existingItem.quantity,
+          lastUpdated: new Date(),
+          createdAt: new Date(),
+          syncStatus: "synced",
+          type: "purchase",
+        });
+        const activity = {
+          locationID: "",
+          activityID: uuidv4(),
+          actionType: "inventory update",
+          createdAt: new Date(),
+          actionedBy: "",
+          syncStatus: "pending",
+        };
+        await aStore.add(activity);
+      } else {
+        const item = {
+          ...newItem,
+          inventoryID: uuidv4(),
+          lastUpdated: new Date().toISOString(),
+        };
+
+        await store.add(item);
+        const activity = {
+          locationID: "",
+          activityID: uuidv4(),
+          actionType: "inventory addition",
+          createdAt: new Date(),
+          actionedBy: "",
+          syncStatus: "pending",
+        };
+        await aStore.add(activity);
+
+        await tstore.add({
+          ...item,
+          transactionID: uuidv4(),
+          inventoryID: item.id,
+          type: "purchase",
+          quantity: item.quantity,
+          lastUpdated: new Date(),
+          createdAt: new Date(),
+          syncStatus: "synced",
+        });
+      }
+
       await tx.done;
 
       await refetch();
@@ -79,7 +125,14 @@ const useInventory = () => {
     }
   }
 
-  return { items, vendors, loading, handleAddItem, handleEditItem };
+  return {
+    items,
+    products,
+    categories,
+    loading,
+    handleAddItem,
+    handleEditItem,
+  };
 };
 
 export default useInventory;
