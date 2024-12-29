@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { inventoryFields } from "./constant";
 import Form from "@/components/ui/Form";
 import DetailedVew from "@/components/detailed-vew";
+import { Badge } from "@/components/ui/Badge";
 
 type View = "create" | "view" | "edit";
 
@@ -74,6 +75,23 @@ const InventoryModule = () => {
       key: "lastUpdated",
       label: "Last Updated",
       render: (item) => new Date(item.lastUpdated).toLocaleString(),
+    },
+    {
+      key: "status",
+      label: "Sync Status",
+      render: (item) => (
+        <Badge
+          variant={
+            item.syncStatus === "synced"
+              ? "success"
+              : item.syncStatus === "pending"
+              ? "warning"
+              : "error"
+          }
+        >
+          {item.syncStatus}
+        </Badge>
+      ),
     },
     {
       key: "actions",

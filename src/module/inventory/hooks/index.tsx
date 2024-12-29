@@ -32,6 +32,7 @@ const useInventory = () => {
         existingItem.minQuantity = newItem.minQuantity
           ? newItem.minQuantity
           : existingItem.minQuantity;
+        existingItem.syncStatus = "pending";
         await store.put(existingItem);
         await tstore.add({
           transactionID: uuidv4(),
@@ -57,6 +58,8 @@ const useInventory = () => {
           ...newItem,
           inventoryID: uuidv4(),
           lastUpdated: new Date().toISOString(),
+          syncStatus: "pending",
+          createdAt: new Date(),
         };
 
         await store.add(item);
@@ -78,7 +81,7 @@ const useInventory = () => {
           quantity: item.quantity,
           lastUpdated: new Date(),
           createdAt: new Date(),
-          syncStatus: "synced",
+          syncStatus: "pending",
         });
       }
 

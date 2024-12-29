@@ -1,76 +1,80 @@
 import AppLayout from "@/components/app-layout";
-import Modal from "@/components/ui/Modal";
-import { AlertTriangle, BarChart2, Edit2, Eye, Plus } from "lucide-react";
+import { AlertTriangle, Filter, TrendingDown, TrendingUp } from "lucide-react";
 import React, { useState, memo } from "react";
 import { Table } from "@/components/ui/Table";
-import { Link } from "react-router-dom";
-import Form from "@/components/ui/Form";
-import DetailedVew from "@/components/detailed-vew";
-import useProduct from "./hooks";
-import { customersFields } from "./constant";
+import { format } from "date-fns";
+import { Badge } from "@/components/ui/Badge";
+import useTransaction from "./hooks";
+import useFetch from "@/hooks/use-fetch";
+import { db } from "@/lib/db";
 
-type View = "create" | "view" | "edit";
-
-const SuppliersModule = () => {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { items, loading, handleAddItem, handleEditItem } = useProduct();
-  const [selectedItem, setSelectedItem] = useState<any>({
-    customerID: "",
-  });
-  const [view, setView] = useState<View>("create");
+const TransactionModule = () => {
+  const { items: products } = useFetch("products", db);
+  const {
+    transactions,
+    loading,
+    setFilter,
+    setStartDate,
+    setEndDate,
+    filter,
+    startDate,
+    endDate,
+  } = useTransaction();
 
   const columns = [
-    { key: "supplierName", label: "Supplier Name" },
-    { key: "contactPerson", label: "Contact Person" },
-    { key: "email", label: "Contact Email" },
-    { key: "phone", label: "Contact Phone" },
-    { key: "website", label: "website" },
     {
-      key: "status",
-      label: "Status",
+      key: "createdAt",
+      label: "Date & Time",
+      render: (transaction) =>
+        format(new Date(transaction?.createdAt), "MMM d, yyyy HH:mm"),
+    },
+    {
+      key: "name",
+      label: "Item",
+      render: (item: any) => {
+        const productName = products.find(
+          (product: any) => product.productID === item.productID
+        );
+        return productName?.name || "";
+      },
+    },
+    {
+      key: "type",
+      label: "Type",
       render: (item) =>
-        item.status === "in-active" ? (
+        item.type === "requisition" ? (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-            <AlertTriangle className="h-3 w-3 mr-1" />
-            Inactive
+            <TrendingDown className="h-3 w-3 mr-1" />
+            requisition
           </span>
         ) : (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-            Active
+            <TrendingUp className="h-3 w-3 mr-1" />
+            purchase
           </span>
         ),
     },
+
     {
-      key: "lastUpdated",
-      label: "Last Updated",
-      render: (item) => new Date(item.lastUpdated).toLocaleDateString(),
+      key: "quantity",
+      label: "Quantity",
     },
+
     {
-      key: "actions",
-      label: "Actions",
+      key: "status",
+      label: "Sync Status",
       render: (item) => (
-        <div className="text-left text-sm font-medium space-x-3">
-          <button
-            onClick={() => {
-              setView("view");
-              setSelectedItem(item);
-              setIsOpen(true);
-            }}
-            className="text-gray-600 hover:text-gray-900"
-          >
-            <Eye className="h-4 w-4 inline" />
-          </button>
-          <button
-            onClick={() => {
-              setSelectedItem(item);
-              setIsOpen(true);
-              setView("edit");
-            }}
-            className="text-blue-600 hover:text-blue-900"
-          >
-            <Edit2 className="h-4 w-4 inline" />
-          </button>
-        </div>
+        <Badge
+          variant={
+            item.syncStatus === "synced"
+              ? "success"
+              : item.syncStatus === "pending"
+              ? "warning"
+              : "error"
+          }
+        >
+          {item.syncStatus}
+        </Badge>
       ),
     },
   ];
@@ -81,58 +85,75 @@ const SuppliersModule = () => {
     );
   }
 
-  const reformedSelectedItem = {
-    ...selectedItem,
-  };
-
   return (
     <div>
       <AppLayout
-        title="Suppliers"
-        description="Manage your suppliers"
-        actions={
-          <button
-            onClick={() => {
-              setIsOpen(true);
-              setSelectedItem({});
-              setView("create");
-            }}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700"
-          >
-            <Plus className="h-4 w-4" />
-            Add Supplier
-          </button>
-        }
+        title="Transactions"
+        description="View inventory and sales transactions"
+        actions={<></>}
       >
-        <div>
-          <Table data={items} columns={columns} />
-          <Modal
-            title="Add New Item"
-            handleClose={() => {
-              setIsOpen(false);
-              setSelectedItem(null);
-            }}
-            isOpen={isOpen}
-          >
-            {view === "view" ? (
-              <DetailedVew selectedItem={reformedSelectedItem} />
-            ) : (
-              <Form
-                fields={customersFields}
-                onSubmit={
-                  view === "create"
-                    ? handleAddItem
-                    : (data) => handleEditItem(data, selectedItem.supplierID)
-                }
-                onCancel={() => setIsOpen(false)}
-                initialData={view === "edit" ? selectedItem : []}
+        <div className="p-4">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+              <button
+                onClick={() => setFilter("all")}
+                className={`${
+                  filter === "all"
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              >
+                Inventory Transactions
+              </button>
+              <button
+                onClick={() => setFilter("sales")}
+                className={`${
+                  filter === "sales"
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+              >
+                Sales Transactions
+              </button>
+            </nav>
+          </div>
+          <div className="flex items-center gap-3 my-6">
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="bg-white border border-gray-200 rounded-lg text-sm py-1.5 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+              <span className="text-gray-500">to</span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="bg-white border border-gray-200 rounded-lg text-sm py-1.5 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <Filter className="h-4 w-4 text-gray-400" />
+            {filter !== "sales" && (
+              <select
+                className="bg-white border border-gray-200 rounded-lg text-sm py-1.5 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={filter}
+                onChange={(e) =>
+                  setFilter(e.target.value as "all" | "in" | "out")
+                }
+              >
+                <option value="all">All Transactions</option>
+                <option value="purchase">Stock In</option>
+                <option value="requisition">Stock Out</option>
+              </select>
             )}
-          </Modal>
+          </div>
+
+          <Table data={transactions} columns={columns} />
         </div>
       </AppLayout>
     </div>
   );
 };
 
-export default memo(SuppliersModule);
+export default memo(TransactionModule);

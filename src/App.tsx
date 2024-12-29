@@ -2,8 +2,6 @@ import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { Inventory } from "./pages/Inventory";
-import { Vendors } from "./pages/Vendors";
-import { Transactions } from "./pages/Transactions";
 import { PurchaseOrders } from "./pages/PurchaseOrders";
 import { POS } from "./pages/POS";
 import { Analytics } from "./pages/Analytics";
@@ -17,6 +15,7 @@ import { Locations } from "./pages/Locations";
 import { Activities } from "./pages/Activities";
 import { Customers } from "./pages/Customers";
 import { Suppliers } from "./pages/Suppliers";
+import { Transactions } from "./pages/Transactions";
 
 function App() {
   return (
@@ -32,7 +31,6 @@ function App() {
           <Route path="customers" element={<Customers />} />
           <Route path="suppliers" element={<Suppliers />} />
           <Route path="inventory/:id" element={<InventoryItem />} />
-          <Route path="vendors" element={<Vendors />} />
           <Route path="transactions" element={<Transactions />} />
           <Route path="orders" element={<PurchaseOrders />} />
           <Route path="pos" element={<POS />} />

@@ -2,7 +2,7 @@ import React, { FC, memo, useState } from "react";
 
 interface Props {
   options: { value: string; label: string }[];
-  label: string;
+  label?: string;
   required?: boolean;
   value?: string;
   onChange: (e: any) => void;
@@ -11,7 +11,11 @@ interface Props {
 const Select: FC<Props> = ({ options, label, required, value, onChange }) => {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700">{label}</label>
+      {label && (
+        <label className="block text-sm font-medium text-gray-700">
+          {label}
+        </label>
+      )}{" "}
       <select
         required={required}
         value={value}

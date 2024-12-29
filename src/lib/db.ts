@@ -106,20 +106,24 @@ interface InventoryDB extends DBSchema {
     indexes: { "by-inventoryID": string };
   };
 
-  purchaseOrders: {
+  purchase_orders: {
     key: string;
     value: {
-      id: string;
+      purchaseOrderID: string;
       vendorId: string;
-      vendorName: string;
-      status: "pending" | "approved" | "received" | "cancelled";
-      products: { productID: string; quantity: number; amount: number }[];
+      status: "requested" | "approved" | "requested" | "received" | "cancelled";
+      proditemmsucts: {
+        inventoryID: string;
+        productID: string;
+        quantity: number;
+        amount: number;
+      }[];
       totalAmount: number;
       createdAt: Date;
       expectedDelivery: string;
       syncStatus: "pending" | "synced" | "error";
     };
-    indexes: { "by-status": string };
+    indexes: { "by-purchaseOrderID": string };
   };
 
   inventory_transactions: {
@@ -252,10 +256,10 @@ export const initDB = async () => {
       });
 
       // Create purchaseOrders store
-      const purchaseOrdersStore = db.createObjectStore("purchaseOrders", {
-        keyPath: "id",
+      const purchaseOrdersStore = db.createObjectStore("purchase_orders", {
+        keyPath: "purchaseOrderID",
       });
-      purchaseOrdersStore.createIndex("by-status", "status");
+      purchaseOrdersStore.createIndex("by-purchaseOrderID", "status");
 
       // Create inventory_transactions store
       const inventoryTransactionsStore = db.createObjectStore(

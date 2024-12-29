@@ -7,6 +7,7 @@ import Form from "@/components/ui/Form";
 import DetailedVew from "@/components/detailed-vew";
 import useCategory from "./hooks";
 import { categoriesFields } from "./constant";
+import { Badge } from "@/components/ui/Badge";
 
 type View = "create" | "view" | "edit";
 
@@ -40,6 +41,23 @@ const CategoriesModule = () => {
       key: "lastUpdated",
       label: "Last Updated",
       render: (item) => new Date(item.lastUpdated).toLocaleDateString(),
+    },
+    {
+      key: "status",
+      label: "Sync Status",
+      render: (item) => (
+        <Badge
+          variant={
+            item.syncStatus === "synced"
+              ? "success"
+              : item.syncStatus === "pending"
+              ? "warning"
+              : "error"
+          }
+        >
+          {item.syncStatus}
+        </Badge>
+      ),
     },
     {
       key: "actions",

@@ -25,7 +25,7 @@ const ActivityModule = () => {
     { key: "actionType", label: "Action Type" },
     {
       key: "status",
-      label: "Status",
+      label: "Sync Status",
       render: (item) => (
         <Badge
           variant={

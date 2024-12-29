@@ -8,6 +8,7 @@ import Form from "@/components/ui/Form";
 import DetailedVew from "@/components/detailed-vew";
 import useProduct from "./hooks";
 import { locationsFields } from "./constant";
+import { Badge } from "@/components/ui/Badge";
 
 type View = "create" | "view" | "edit";
 
@@ -41,6 +42,23 @@ const LocationsModule = () => {
       key: "lastUpdated",
       label: "Last Updated",
       render: (item) => new Date(item.lastUpdated).toLocaleDateString(),
+    },
+    {
+      key: "status",
+      label: "Sync Status",
+      render: (item) => (
+        <Badge
+          variant={
+            item.syncStatus === "synced"
+              ? "success"
+              : item.syncStatus === "pending"
+              ? "warning"
+              : "error"
+          }
+        >
+          {item.syncStatus}
+        </Badge>
+      ),
     },
     {
       key: "actions",
