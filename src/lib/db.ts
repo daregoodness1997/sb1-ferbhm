@@ -154,6 +154,35 @@ interface InventoryDB extends DBSchema {
     };
     indexes: { "by-saleID": string };
   };
+
+  menus: {
+    key: string;
+    value: {
+      menuID: string;
+      description?: string;
+      menuCategoryID: string;
+      price: string;
+      noOfServingsLeft: number;
+      minServing: number;
+      lastUpdated: Date;
+      createdAt: Date;
+      syncStatus: "pending" | "synced" | "error";
+    };
+    indexes: { "by-menuID": string };
+  };
+
+  menu_category: {
+    key: string;
+    value: {
+      menuCategoryId: string;
+      menuCategoryName?: string;
+      lastUpdated: Date;
+      createdAt: Date;
+      syncStatus: "pending" | "synced" | "error";
+    };
+    indexes: { "by-menuCategoryID": string };
+  };
+
   sales_items: {
     key: string;
     value: {
@@ -190,6 +219,16 @@ export const initDB = async () => {
         keyPath: "productID",
       });
       productsStore.createIndex("by-productID", "productID", { unique: true });
+      const menusStore = db.createObjectStore("menus", {
+        keyPath: "menuID",
+      });
+      menusStore.createIndex("by-menuID", "menuID", { unique: true });
+      const menuCategoryStore = db.createObjectStore("menu_category", {
+        keyPath: "menuCategoryID",
+      });
+      menuCategoryStore.createIndex("by-menuCategoryID", "menuCategoryID", {
+        unique: true,
+      });
 
       // Create categories store
       const categoriesStore = db.createObjectStore("categories", {

@@ -8,7 +8,7 @@ import { Analytics } from "./pages/Analytics";
 import { StockReceiptList } from "./components/StockReceiptList";
 import { StockReceiptFormWrapper } from "./components/StockReceiptFormWrapper";
 import { InventoryItem } from "./pages/InventoryItem";
-import { Menu } from "./pages/Menu";
+import Menu from "./pages/Menu";
 import Products from "./pages/Products";
 import { Categories } from "./pages/Categories";
 import { Locations } from "./pages/Locations";

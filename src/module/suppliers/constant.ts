@@ -15,13 +15,11 @@ export const customersFields = [
     label: "Contact Email",
     type: "email",
     name: "email",
-    required: true,
   },
   {
     label: "Contact Phone",
     type: "text",
     name: "phone",
-    required: true,
   },
   {
     label: "Contact Address",
@@ -33,7 +31,6 @@ export const customersFields = [
     label: "Website",
     type: "text",
     name: "website",
-    required: true,
   },
 
   {

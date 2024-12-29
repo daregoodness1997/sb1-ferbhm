@@ -112,7 +112,6 @@ const PurchaseOrderModule = () => {
                               {statusDetails.text}
                             </span>
                           </span>
-                          a
                         </div>
                       </div>
                     </Card.Header>
