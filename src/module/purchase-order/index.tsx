@@ -38,27 +38,27 @@ const PurchaseOrderModule = () => {
     const config = {
       requested: {
         icon: <Clock className="h-4 w-4" />,
-        variant: "warning" as const,
+        variant: "orange" as const,
         text: "Pending",
       },
       approved: {
         icon: <CheckCircle className="h-4 w-4" />,
-        variant: "success" as const,
+        variant: "green" as const,
         text: "Approved",
       },
       received: {
         icon: <Package className="h-4 w-4" />,
-        variant: "info" as const,
+        variant: "blue" as const,
         text: "Recieved",
       },
       cancelled: {
         icon: <XCircle className="h-4 w-4" />,
-        variant: "error" as const,
+        variant: "red" as const,
         text: "Cancelled",
       },
       paid: {
         icon: <CheckCircle className="h-4 w-4" />,
-        variant: "success" as const,
+        variant: "purple" as const,
         text: "Paid",
       },
     };
@@ -105,13 +105,14 @@ const PurchaseOrderModule = () => {
                         </div>
                         <div className="flex gap-2">
                           <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${statusDetails.variant}-100 text-${statusDetails.variant}-800`}
+                            className={`inline-flex items-center px-2.5 py-1 gap-2 rounded-full text-xs font-medium bg-${statusDetails.variant}-100 text-${statusDetails.variant}-800`}
                           >
                             {statusDetails.icon}
                             <span className="capitalize">
                               {statusDetails.text}
                             </span>
                           </span>
+                          a
                         </div>
                       </div>
                     </Card.Header>
