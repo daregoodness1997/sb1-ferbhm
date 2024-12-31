@@ -6,9 +6,17 @@ interface Props {
   required?: boolean;
   value?: string;
   onChange: (e: any) => void;
+  disabled?: boolean;
 }
 
-const Select: FC<Props> = ({ options, label, required, value, onChange }) => {
+const Select: FC<Props> = ({
+  options,
+  label,
+  required,
+  value,
+  onChange,
+  disabled,
+}) => {
   return (
     <div>
       {label && (
@@ -20,6 +28,7 @@ const Select: FC<Props> = ({ options, label, required, value, onChange }) => {
         required={required}
         value={value}
         onChange={onChange}
+        disabled={disabled}
         className="mt-1 p-1 block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
       >
         <option value="">Select an option</option>

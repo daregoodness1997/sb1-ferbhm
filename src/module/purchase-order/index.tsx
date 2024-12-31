@@ -7,20 +7,23 @@ import {
   XCircle,
   Plus,
   Badge,
+  View,
 } from "lucide-react";
 import React, { useState, memo } from "react";
 import usePurchaseOrder from "./hooks";
 import { Card } from "@/components/ui/Card";
 import { format } from "date-fns";
 import PurchaseOrderForm from "./components/PurchaseOrderForm";
+import CancelOrder from "./components/CancelOrder";
 
-type View = "create" | "view" | "edit";
+type View = "create" | "cancel" | "approve" | "recieve";
 
 type OrderStatus = "requested" | "approved" | "received" | "cancelled" | "paid";
 
 const PurchaseOrderModule = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [view, setView] = useState("create");
+  const [selectedItem, setSelectedItem] = useState({});
+  const [view, setView] = useState<View>("create");
   const {
     items: orders,
     products,
@@ -73,7 +76,10 @@ const PurchaseOrderModule = () => {
         description="Manage and track purchase orders"
         actions={
           <button
-            onClick={() => setIsOpen(true)}
+            onClick={() => {
+              setIsOpen(true);
+              setView("create");
+            }}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700"
           >
             <Plus className="h-4 w-4" />
@@ -87,8 +93,6 @@ const PurchaseOrderModule = () => {
               const statusDetails = getStatusDetails(order.status);
               const getVendor = (id: string) =>
                 vendors.find((item: any) => item.supplierID === id);
-
-              console.log(order, statusDetails, "order");
 
               return (
                 <div className="p-4">
@@ -115,7 +119,6 @@ const PurchaseOrderModule = () => {
                         </div>
                       </div>
                     </Card.Header>
-
                     <Card.Content>
                       <div className="overflow-x-auto">
                         <table className="w-full">
@@ -202,6 +205,39 @@ const PurchaseOrderModule = () => {
                         </div>
                       </div>
                     </Card.Content>
+                    <div className="flex justify-end space-x-3 p-4">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsOpen(true);
+                          setView("cancel");
+                        }}
+                        className="px-3 py-1 text-sm font-medium text-red-700 bg-red-50 border border-red-300 rounded-md hover:bg-gray-50"
+                      >
+                        Cancel Order
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsOpen(true);
+                          setView("approve");
+                        }}
+                        className="px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                      >
+                        Mark as Approved
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsOpen(true);
+                          setView("recieve");
+                          setSelectedItem(order);
+                        }}
+                        className="px-3 py-1 text-sm font-medium text-white bg-gray-600 rounded-md hover:bg-gray-700"
+                      >
+                        Recieve Order
+                      </button>
+                    </div>{" "}
                   </Card>
                 </div>
               );
@@ -210,10 +246,18 @@ const PurchaseOrderModule = () => {
 
           <Modal
             isOpen={isOpen}
-            title="Create Purchase Order"
+            title={`${view.toLocaleUpperCase()} Purchase Order`}
             handleClose={(e) => setIsOpen(false)}
           >
-            <PurchaseOrderForm refetch={refetch} />
+            {view === "create" ||
+              (view === "recieve" && (
+                <PurchaseOrderForm
+                  refetch={refetch}
+                  isEditing={true}
+                  initialData={selectedItem}
+                />
+              ))}
+            {view === "cancel" && <CancelOrder />}
           </Modal>
         </div>
       </AppLayout>

@@ -111,11 +111,18 @@ interface InventoryDB extends DBSchema {
     value: {
       purchaseOrderID: string;
       vendorId: string;
-      status: "requested" | "approved" | "requested" | "received" | "cancelled";
+      status:
+        | "requested"
+        | "approved"
+        | "received"
+        | "cancelled"
+        | "full_paid"
+        | "part_paid";
       proditemmsucts: {
         inventoryID: string;
         productID: string;
         quantity: number;
+        quantityRecieved: number;
         amount: number;
       }[];
       totalAmount: number;

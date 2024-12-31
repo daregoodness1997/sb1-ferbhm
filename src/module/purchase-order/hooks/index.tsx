@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import { db } from "@/lib/db";
 import useFetch from "@/hooks/use-fetch";
 import shortid from "shortid";
+import useInventory from "@/module/inventory/hooks";
 
 const usePurchaseOrder = () => {
   const { items, loading, error, refetch } = useFetch("purchase_orders", db);
   const { items: vendors } = useFetch("suppliers", db);
-  const { items: inventory } = useFetch("inventory", db);
   const { items: products } = useFetch("products", db);
+  const { handleEditItem: updateIventory, items: inventory } = useInventory();
 
   const locationID = localStorage.getItem("locationID") || "";
 
@@ -50,7 +51,11 @@ const usePurchaseOrder = () => {
     }
   }
 
-  async function handleEditItem(updatedItem: any, id: string) {
+  async function handleEditItem(
+    updatedItem: any,
+    id: string,
+    type: "cancel" | "approve" | "recieve" | "paid"
+  ) {
     try {
       const database = await db;
       const tx = database.transaction(
@@ -60,11 +65,18 @@ const usePurchaseOrder = () => {
       const store = tx.objectStore("purchase_orders");
       const aStore = tx.objectStore("activities");
 
+      const selectedType = {
+        cancel: "Cancelled",
+        approve: "Approved",
+        recieve: "Recieved",
+        paid: "Paid",
+      };
+
       const item = {
         ...updatedItem,
         supplierID: id,
         lastUpdated: new Date().toISOString(),
-        status: "active",
+        status: selectedType[type],
         syncStatus: "pending" as "pending" | "synced" | "error",
       };
 

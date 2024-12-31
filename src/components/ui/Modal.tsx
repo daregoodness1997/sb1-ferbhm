@@ -21,7 +21,7 @@ const Modal: FC<Props> = ({ handleClose, children, title, isOpen }) => {
           transition={{ duration: 0.3 }}
         >
           <motion.div
-            className="bg-white rounded-lg p-6 w-full max-w-4xl"
+            className="bg-white rounded-lg p-6 w-full max-w-2xl"
             initial={{ scale: 0.95 }}
             animate={{ scale: 1 }}
             exit={{ scale: 0.95 }}

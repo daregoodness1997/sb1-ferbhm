@@ -8,22 +8,38 @@ import { Trash } from "lucide-react";
 
 interface Props {
   refetch: () => void;
-}
-
-const PurchaseOrderForm: FC<Props> = ({ refetch }) => {
-  const [formData, setFormData] = useState({
-    vendorId: "",
-    items: [] as Array<{
+  isEditing?: boolean;
+  initialData?: {
+    vendorId: string;
+    items: Array<{
       inventoryID: string;
       productID: string;
       quantity: number;
+      quantityRecieved: number;
       amount: number;
-    }>,
-    expectedDelivery: new Date().toISOString().split("T")[0],
+    }>;
+    expectedDelivery: string;
+  };
+}
+
+const PurchaseOrderForm: FC<Props> = ({ refetch, initialData, isEditing }) => {
+  const [formData, setFormData] = useState({
+    vendorId: initialData?.vendorId || "",
+    items:
+      initialData?.items ||
+      ([] as Array<{
+        inventoryID: string;
+        productID: string;
+        quantity: number;
+        amount: number;
+      }>),
+    expectedDelivery:
+      initialData?.expectedDelivery || new Date().toISOString().split("T")[0],
   });
 
   const { vendors, inventory, products, handleAddItem } = usePurchaseOrder();
-  const getProduct = (id) => products.find((item) => item.productID === id);
+  const getProduct = (id: string) =>
+    products.find((item: any) => item.productID === id);
 
   const addItem = () => {
     setFormData((prev: typeof formData) => ({
@@ -38,13 +54,13 @@ const PurchaseOrderForm: FC<Props> = ({ refetch }) => {
   const updateItem = (index: number, field: string, value: any) => {
     setFormData((prev: typeof formData) => ({
       ...prev,
-      items: prev.items.map((item, i) =>
+      items: prev.items.map((item: any, i: number) =>
         i === index ? { ...item, [field]: value } : item
       ),
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: any) => {
     e.preventDefault();
     handleAddItem(formData);
     refetch();
@@ -58,13 +74,14 @@ const PurchaseOrderForm: FC<Props> = ({ refetch }) => {
             label="Supplier"
             required
             value={formData.vendorId}
-            onChange={(e) =>
+            disabled={isEditing ? true : false}
+            onChange={(e: any) =>
               setFormData((prev: typeof formData) => ({
                 ...prev,
                 vendorId: e.target.value,
               }))
             }
-            options={vendors.map((item) => ({
+            options={vendors.map((item: any) => ({
               value: item.supplierID,
               label: item.supplierName,
             }))}
@@ -77,8 +94,9 @@ const PurchaseOrderForm: FC<Props> = ({ refetch }) => {
           <Input
             type="date"
             required
+            disabled={isEditing ? true : false}
             value={formData.expectedDelivery}
-            onChange={(e) =>
+            onChange={(e: any) =>
               setFormData((prev: typeof formData) => ({
                 ...prev,
                 expectedDelivery: e.target.value,
@@ -107,6 +125,11 @@ const PurchaseOrderForm: FC<Props> = ({ refetch }) => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Quantity
                   </th>
+                  {isEditing && (
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Quantity Recieved
+                    </th>
+                  )}
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Price
                   </th>
@@ -116,17 +139,18 @@ const PurchaseOrderForm: FC<Props> = ({ refetch }) => {
                 </tr>
               </thead>
               <tbody>
-                {formData.items.map((item, index) => (
+                {formData.items.map((item: any, index: number) => (
                   <tr key={item.id}>
                     <td>
                       <Select
                         required
                         value={item.name}
-                        onChange={(e) => {
+                        disabled={isEditing ? true : false}
+                        onChange={(e: any) => {
                           updateItem(index, "inventoryID", e.target.value);
                           updateItem(index, "productID", e.target.value);
                         }}
-                        options={inventory.map((item) => ({
+                        options={inventory.map((item: any) => ({
                           value: item.productID,
                           label:
                             getProduct(item?.productID || "")?.productName ||
@@ -137,10 +161,11 @@ const PurchaseOrderForm: FC<Props> = ({ refetch }) => {
                     <td>
                       <Input
                         type="number"
+                        disabled={isEditing ? true : false}
                         placeholder="Quantity"
                         min="1"
                         value={item.quantity}
-                        onChange={(e) =>
+                        onChange={(e: any) =>
                           updateItem(
                             index,
                             "quantity",
@@ -149,6 +174,24 @@ const PurchaseOrderForm: FC<Props> = ({ refetch }) => {
                         }
                       />
                     </td>
+
+                    {isEditing && (
+                      <td>
+                        <Input
+                          type="number"
+                          placeholder="Quantity Recieved"
+                          min="1"
+                          value={item.quantityRecieved}
+                          onChange={(e: any) =>
+                            updateItem(
+                              index,
+                              "quantityRecieved",
+                              parseInt(e.target.value)
+                            )
+                          }
+                        />
+                      </td>
+                    )}
                     <td>
                       <Input
                         type="number"
@@ -156,7 +199,7 @@ const PurchaseOrderForm: FC<Props> = ({ refetch }) => {
                         min="0"
                         step="0.01"
                         value={item.price}
-                        onChange={(e) =>
+                        onChange={(e: any) =>
                           updateItem(
                             index,
                             "amount",
@@ -169,10 +212,13 @@ const PurchaseOrderForm: FC<Props> = ({ refetch }) => {
                       <Button
                         type="button"
                         variant="outline"
+                        disabled={isEditing ? true : false}
                         onClick={() =>
                           setFormData((prev: typeof formData) => ({
                             ...prev,
-                            items: prev.items.filter((_, i) => i !== index),
+                            items: prev.items.filter(
+                              (_: any, i: number) => i !== index
+                            ),
                           }))
                         }
                       >
