@@ -52,7 +52,7 @@ const PurchaseOrderModule = () => {
       },
       recieved: {
         icon: <Package className="h-4 w-4" />,
-        variant: "blue" as const,
+        variant: "yellow" as const,
         text: "Recieved",
       },
       cancelled: {
@@ -98,9 +98,13 @@ const PurchaseOrderModule = () => {
       >
         <div>
           <div className="flex flex-col ">
-            {orders &&
-              orders.map((order: any) => {
-                console.log(order?.status, "status");
+            {orders
+              .sort(
+                (a, b) =>
+                  new Date(b.lastUpdated).getTime() -
+                  new Date(a.lastUpdated).getTime()
+              )
+              .map((order: any) => {
                 const statusDetails = getStatusDetails(order?.status);
                 const getVendor = (id: string) =>
                   vendors.find((item: any) => item.supplierID === id);
@@ -211,7 +215,7 @@ const PurchaseOrderModule = () => {
 
                         <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between text-sm text-gray-500">
                           <div>
-                            Created:{" "}
+                            Last Updated:{" "}
                             {format(
                               new Date(order?.lastUpdated),
                               "MMM d, yyyy hh:mm:ss"
@@ -235,10 +239,14 @@ const PurchaseOrderModule = () => {
                             setSelectedItem(order);
                           }}
                           disabled={
-                            order?.status === "cancelled" ? true : false
+                            order?.status === "cancelled" ||
+                            order?.status === "recieved"
+                              ? true
+                              : false
                           }
                           className={`px-3 py-1 text-sm font-medium text-red-700 bg-red-50 border border-red-300 rounded-md hover:bg-gray-50 ${
-                            order?.status === "cancelled"
+                            order?.status === "cancelled" ||
+                            order?.status === "recieved"
                               ? "opacity-50 cursor-not-allowed"
                               : ""
                           }`}
@@ -254,9 +262,17 @@ const PurchaseOrderModule = () => {
                               "approve"
                             );
                           }}
-                          disabled={order?.status === "approved" ? true : false}
+                          disabled={
+                            order?.status === "approved" ||
+                            order?.status === "cancelled" ||
+                            order?.status === "recieved"
+                              ? true
+                              : false
+                          }
                           className={`px-3 py-1 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 ${
-                            order?.status === "approved"
+                            order?.status === "approved" ||
+                            order?.status === "cancelled" ||
+                            order?.status === "recieved"
                               ? "opacity-50 cursor-not-allowed"
                               : ""
                           }`}
@@ -265,14 +281,20 @@ const PurchaseOrderModule = () => {
                         </button>
                         <button
                           type="button"
-                          disabled={order?.status === "recieved" ? true : false}
+                          disabled={
+                            order?.status === "recieved" ||
+                            order?.status === "cancelled"
+                              ? true
+                              : false
+                          }
                           onClick={() => {
                             setIsOpen(true);
                             setView("recieve");
                             setSelectedItem(order);
                           }}
                           className={`px-3 py-1 text-sm font-medium text-white bg-gray-600 rounded-md hover:bg-gray-700 ${
-                            order?.status === "recieved"
+                            order?.status === "recieved" ||
+                            order?.status === "cancelled"
                               ? "opacity-50 cursor-not-allowed"
                               : ""
                           }`}

@@ -59,11 +59,12 @@ const usePurchaseOrder = () => {
     try {
       const database = await db;
       const tx = database.transaction(
-        ["purchase_orders", "activities"],
+        ["purchase_orders", "activities", "inventory"],
         "readwrite"
       );
       const store = tx.objectStore("purchase_orders");
       const aStore = tx.objectStore("activities");
+      const invStore = tx.objectStore("inventory");
 
       const selectedType = {
         cancel: "cancelled",
