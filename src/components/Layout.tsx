@@ -7,6 +7,7 @@ import {
   Activity,
   ShoppingCart,
   BarChart,
+  BookCopy,
 } from "lucide-react";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 
@@ -20,20 +21,54 @@ export function Layout() {
         <div className="p-4">
           <h1 className="text-xl font-bold flex items-center gap-2">
             <Package className="h-6 w-6" />
-            Inventory Pro
+            Demeteri Pro
           </h1>
         </div>
-
         <nav className="mt-8">
           <NavLink to="/" icon={<Package />} active={location.pathname === "/"}>
             Inventory
           </NavLink>
           <NavLink
-            to="/vendors"
-            icon={<Users />}
-            active={location.pathname === "/vendors"}
+            to="/products"
+            icon={<BookCopy />}
+            active={location.pathname === "/products"}
           >
-            Vendors
+            Products
+          </NavLink>
+          <NavLink
+            to="/categories"
+            icon={<BookCopy />}
+            active={location.pathname === "/categories"}
+          >
+            Categories
+          </NavLink>
+          <NavLink
+            to="/locations"
+            icon={<BookCopy />}
+            active={location.pathname === "/locations"}
+          >
+            Locations
+          </NavLink>
+          <NavLink
+            to="/activities"
+            icon={<Activity />}
+            active={location.pathname === "/activities"}
+          >
+            Activities
+          </NavLink>
+          <NavLink
+            to="/customers"
+            icon={<Users />}
+            active={location.pathname === "/customers"}
+          >
+            Customers
+          </NavLink>
+          <NavLink
+            to="/suppliers"
+            icon={<Users />}
+            active={location.pathname === "/suppliers"}
+          >
+            Suppliers
           </NavLink>
           <NavLink
             to="/transactions"
@@ -48,6 +83,14 @@ export function Layout() {
             active={location.pathname === "/orders"}
           >
             Purchase Orders
+          </NavLink>
+
+          <NavLink
+            to="/menu"
+            icon={<Package />}
+            active={location.pathname === "/menu"}
+          >
+            Menu
           </NavLink>
           <NavLink
             to="/pos"
@@ -139,17 +182,31 @@ function NavLink({
 function getPageTitle(pathname: string): string {
   switch (pathname) {
     case "/":
-      return "Inventory";
-    case "/vendors":
-      return "Vendors";
+      return "Dashboard";
+    case "/products":
+      return "Products";
+    case "/categories":
+      return "Categories";
+    case "/locations":
+      return "Locations";
+    case "/activities":
+      return "Activities";
+    case "/customers":
+      return "Customers";
+    case "/supliers":
+      return "Suppliers";
     case "/transactions":
       return "Transactions";
     case "/orders":
       return "Purchase Orders";
+    case "/menu":
+      return "Menu";
     case "/pos":
       return "Point of Sale";
     case "/analytics":
       return "Analytics";
+    case "/stock-receipts":
+      return "Stock Receipts";
     default:
       return "Inventory Management";
   }

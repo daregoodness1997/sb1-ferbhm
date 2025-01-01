@@ -1,5 +1,7 @@
-import { useState } from "react";
-import { Vendor, InventoryItem, StockReceipt } from "../types";
+import React, { useState } from "react";
+import { StockReceipt } from "../types";
+import { Vendor } from "../types";
+import { InventoryItem } from "../types";
 
 interface StockReceiptFormProps {
   vendors: Vendor[];

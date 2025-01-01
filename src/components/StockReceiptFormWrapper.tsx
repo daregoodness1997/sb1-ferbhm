@@ -7,7 +7,7 @@ import { generateTempId } from "../utils/tempId";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { StockReceipt } from "../types";
 import { StockReceiptForm } from "./StockReceiptForm";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 
 export function StockReceiptFormWrapper() {
   const { id } = useParams();
