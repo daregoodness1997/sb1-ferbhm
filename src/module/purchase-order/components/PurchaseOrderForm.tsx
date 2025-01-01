@@ -152,7 +152,7 @@ const PurchaseOrderForm: FC<Props> = ({ refetch, initialData, isEditing }) => {
                     <td>
                       <Select
                         required
-                        value={item.name}
+                        value={item.inventoryID}
                         disabled={isEditing ? true : false}
                         onChange={(e: any) => {
                           updateItem(index, "inventoryID", e.target.value);
@@ -189,6 +189,7 @@ const PurchaseOrderForm: FC<Props> = ({ refetch, initialData, isEditing }) => {
                           type="number"
                           placeholder="Quantity Recieved"
                           min="1"
+                          max={item.quantity}
                           value={item.quantityRecieved}
                           onChange={(e: any) =>
                             updateItem(
@@ -206,7 +207,7 @@ const PurchaseOrderForm: FC<Props> = ({ refetch, initialData, isEditing }) => {
                         placeholder="Price"
                         min="0"
                         step="0.01"
-                        value={item.price}
+                        value={item.amount}
                         onChange={(e: any) =>
                           updateItem(
                             index,
@@ -235,6 +236,25 @@ const PurchaseOrderForm: FC<Props> = ({ refetch, initialData, isEditing }) => {
                     </td>
                   </tr>
                 ))}
+
+                <tr className="bg-gray-50/50 ">
+                  <td
+                    colSpan={4}
+                    className="px-3 py-2 text-right text-sm font-medium text-gray-900"
+                  >
+                    Total Amount:
+                  </td>
+                  <td className="px-3 py-2 text-right text-sm font-medium text-gray-900">
+                    ₦
+                    {formData?.items
+                      .reduce(
+                        (total: number, item: any) =>
+                          total + item.quantity * item.amount,
+                        0
+                      )
+                      .toFixed(2)}
+                  </td>
+                </tr>
               </tbody>
             </table>
           </Card>

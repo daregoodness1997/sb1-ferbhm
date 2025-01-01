@@ -8,6 +8,7 @@ import {
   Plus,
   Badge,
   View,
+  CreditCardIcon,
 } from "lucide-react";
 import React, { useState, memo } from "react";
 import usePurchaseOrder from "./hooks";
@@ -300,6 +301,28 @@ const PurchaseOrderModule = () => {
                           }`}
                         >
                           Recieve Order
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={
+                            order?.status === "cancelled" ? true : false
+                          }
+                          onClick={() => {
+                            setIsOpen(true);
+                            setView("recieve");
+                            setSelectedItem(order);
+                          }}
+                          className={`px-3 py-1 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 flex gap-1 items-center ${
+                            order?.status === "cancelled"
+                              ? "opacity-50 cursor-not-allowed"
+                              : ""
+                          }`}
+                        >
+                          <span>
+                            <CreditCardIcon className="w-4  h-4" />
+                          </span>
+                          <p>Pay Now</p>
                         </button>
                       </div>{" "}
                     </Card>
