@@ -10,6 +10,7 @@ interface Props {
   refetch: () => void;
   isEditing?: boolean;
   initialData?: {
+    purchaseOrderID: string;
     vendorId: string;
     items: Array<{
       inventoryID: string;
@@ -24,6 +25,7 @@ interface Props {
 
 const PurchaseOrderForm: FC<Props> = ({ refetch, initialData, isEditing }) => {
   const [formData, setFormData] = useState({
+    purchaseOrderID: initialData?.purchaseOrderID || "",
     vendorId: initialData?.vendorId || "",
     items:
       initialData?.items ||
@@ -37,7 +39,8 @@ const PurchaseOrderForm: FC<Props> = ({ refetch, initialData, isEditing }) => {
       initialData?.expectedDelivery || new Date().toISOString().split("T")[0],
   });
 
-  const { vendors, inventory, products, handleAddItem } = usePurchaseOrder();
+  const { vendors, inventory, products, handleAddItem, handleEditItem } =
+    usePurchaseOrder();
   const getProduct = (id: string) =>
     products.find((item: any) => item.productID === id);
 
@@ -65,9 +68,14 @@ const PurchaseOrderForm: FC<Props> = ({ refetch, initialData, isEditing }) => {
     handleAddItem(formData);
     refetch();
   };
+  const handleUpdateOrder = (e: any) => {
+    e.preventDefault();
+    handleEditItem(formData, formData.purchaseOrderID, "recieve");
+    refetch();
+  };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={isEditing ? handleUpdateOrder : handleSubmit}>
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Select

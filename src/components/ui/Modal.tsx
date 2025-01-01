@@ -28,7 +28,7 @@ const Modal: FC<Props> = ({ handleClose, children, title, isOpen }) => {
             transition={{ duration: 0.3 }}
           >
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">{title}</h2>
+              <h2 className="text-xl font-semibold capitalize">{title}</h2>
               <button
                 onClick={handleClose}
                 className="text-gray-500 hover:text-gray-700"

@@ -66,15 +66,15 @@ const usePurchaseOrder = () => {
       const aStore = tx.objectStore("activities");
 
       const selectedType = {
-        cancel: "Cancelled",
-        approve: "Approved",
-        recieve: "Recieved",
-        paid: "Paid",
+        cancel: "cancelled",
+        approve: "approved",
+        recieve: "recieved",
+        paid: "paid",
       };
 
       const item = {
         ...updatedItem,
-        supplierID: id,
+        purchaseOrderID: id,
         lastUpdated: new Date().toISOString(),
         status: selectedType[type],
         syncStatus: "pending" as "pending" | "synced" | "error",
@@ -83,7 +83,7 @@ const usePurchaseOrder = () => {
       const activity = {
         locationID: locationID,
         activityID: shortid.generate(),
-        actionType: "purchase order editing",
+        actionType: selectedType[type] + " purchase order editing",
         createdAt: new Date(),
         actionedBy: "",
         syncStatus: "pending" as "pending" | "synced" | "error",
