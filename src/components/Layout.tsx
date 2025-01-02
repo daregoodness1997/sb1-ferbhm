@@ -130,7 +130,7 @@ export function Layout() {
                 </span>
               )}
               <span
-                className={`flex items-center gap-1 ${
+                className={`flex items-center gap-1  ${
                   isOnline ? "text-green-600" : "text-red-600"
                 }`}
               >

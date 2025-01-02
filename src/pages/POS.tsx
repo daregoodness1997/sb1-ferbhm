@@ -70,28 +70,28 @@ export function POS() {
   async function loadInventory() {
     try {
       const database = await db;
-      const items = await database.getAll("inventory");
+      const items = await database.getAll("menus");
       const forSaleItems = items.filter((item) => item.forSale);
-      setInventory(forSaleItems);
+      setInventory(items);
     } catch (error) {
       console.error("Failed to load inventory:", error);
     }
   }
 
-  const filteredInventory = inventory.filter(
-    (item) =>
-      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.sku.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredInventory = inventory.filter((item) =>
+    item.menuName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleAddToCart = (item: any) => {
-    const existingItem = cart.find((cartItem) => cartItem.id === item.id);
+    const existingItem = cart.find(
+      (cartItem) => cartItem.menuID === item.menuID
+    );
     if (existingItem) {
-      updateQuantity(item.id, existingItem.quantity + 1);
+      updateQuantity(item.menuID, existingItem.quantity + 1);
     } else {
       addToCart({
-        id: item.id,
-        name: item.name,
+        menuID: item.menuID,
+        menuName: item.menuName,
         quantity: 1,
         price: item.price || 0,
       });
@@ -117,8 +117,6 @@ export function POS() {
     }
   };
 
-  console.log(cart, filteredInventory, ">>> debugger");
-
   return (
     <div className="flex h-[calc(100vh-4rem)]">
       {/* Product List */}
@@ -143,8 +141,10 @@ export function POS() {
               className="bg-white p-4 rounded-lg shadow-sm cursor-pointer hover:shadow-md transition-shadow"
               onClick={() => handleAddToCart(item)}
             >
-              <h3 className="font-medium">{item.name}</h3>
-              <p className="text-sm text-gray-500">SKU: {item.sku}</p>
+              <h3 className="font-medium">{item.menuName}</h3>
+              <p className="text-sm text-gray-500">
+                Category: {item.menuCategoryID}
+              </p>
               <p className="text-lg font-bold mt-2">₦{item?.price || 0}</p>
               <p className="text-sm text-gray-500">In Stock: {item.quantity}</p>
             </div>
@@ -174,7 +174,7 @@ export function POS() {
             <div key={item.id} className="bg-white p-4 rounded-lg mb-2">
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-medium">{item?.name}</h3>
+                  <h3 className="font-medium">{item?.menuName}</h3>
                   <p className="text-sm text-gray-500">
                     ₦{item?.price?.toFixed(2) || 0} each
                   </p>

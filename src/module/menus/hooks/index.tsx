@@ -15,7 +15,7 @@ const useProduct = () => {
 
   const locationID = localStorage.getItem("locationID") || "";
 
-  async function handleAddItem(newItem: any) {
+  async function handleMenuAdd(newItem: any) {
     try {
       const database = await db;
 
@@ -25,7 +25,7 @@ const useProduct = () => {
 
       const item = {
         ...newItem,
-        productID: shortid.generate(),
+        menuID: shortid.generate(),
         lastUpdated: new Date().toISOString(),
         status: "active",
         syncStatus: "pending",
@@ -64,7 +64,7 @@ const useProduct = () => {
 
       const item = {
         ...newItem,
-        productID: shortid.generate(),
+        menuCategoryID: shortid.generate(),
         lastUpdated: new Date().toISOString(),
         status: "active",
         syncStatus: "pending",
@@ -84,50 +84,21 @@ const useProduct = () => {
 
       await tx.done;
 
-      await refetch();
+      await refetchCategory();
     } catch (error) {
       console.error("Failed to add item:", error);
     }
   }
 
-  async function handleEditItem(updatedItem: any, id: string) {
-    try {
-      const database = await db;
-      const tx = database.transaction(["products", "activities"], "readwrite");
-      const store = tx.objectStore("products");
-      const aStore = tx.objectStore("activities");
-
-      const item = {
-        ...updatedItem,
-        productID: id,
-        lastUpdated: new Date().toISOString(),
-        status: "active",
-        syncStatus: "pending" as "pending" | "synced" | "error",
-      };
-
-      console.log(item, "form items");
-
-      const activity = {
-        locationID: locationID,
-        activityID: uuidv4(),
-        actionType: "product editing",
-        createdAt: new Date(),
-        actionedBy: "",
-        syncStatus: "pending" as "pending" | "synced" | "error",
-      };
-
-      await store.put(item);
-      await aStore.add(activity);
-
-      await tx.done;
-
-      await refetch();
-    } catch (error) {
-      console.error("Failed to update item:", error);
-    }
-  }
-
-  return { items, categories, loading, handleAddItem, handleEditItem };
+  return {
+    items,
+    categories,
+    loading,
+    handleMenuAdd,
+    handleAddCategory,
+    refetchCategory,
+    refetch,
+  };
 };
 
 export default useProduct;

@@ -1,16 +1,29 @@
-export const productsFields = (categories: any[]) => [
-  { label: "Name", type: "text", name: "name", required: true },
-  { label: "SKU", type: "text", name: "sku", required: true },
+export const menusFields = (categories: any[]) => [
+  { label: "Menu Name", type: "text", name: "menuName", required: true },
+  { label: "Description", type: "text", name: "description", required: true },
+  { label: "Price", type: "number", name: "price", required: true },
+  { label: "No of Serving Left", type: "number", name: "noOfServingsLeft" },
+  { label: "Out of Stock", type: "checkbox", name: "outOfStock" },
+  { label: "Minimum Serving", type: "number", name: "minServing" },
 
   {
-    label: "Category",
+    label: "Menu Category",
     type: "select",
-    name: "categoryID",
+    name: "menuCategoryID",
     options: categories.map((item) => ({
-      value: item.categoryID,
-      label: item.categoryName,
+      value: item.menuCategoryID,
+      label: item.menuCategoryName,
     })),
 
+    required: true,
+  },
+];
+
+export const menuCategoriesFields = [
+  {
+    label: "Menu Category",
+    type: "text",
+    name: "menuCategoryName",
     required: true,
   },
 ];

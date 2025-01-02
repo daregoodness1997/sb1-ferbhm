@@ -166,10 +166,12 @@ interface InventoryDB extends DBSchema {
     key: string;
     value: {
       menuID: string;
+      menuName: string;
       description?: string;
       menuCategoryID: string;
       price: string;
-      noOfServingsLeft: number;
+      noOfServingsLeft?: number;
+      outOfStock: boolean;
       minServing: number;
       lastUpdated: Date;
       createdAt: Date;
@@ -181,8 +183,8 @@ interface InventoryDB extends DBSchema {
   menu_category: {
     key: string;
     value: {
-      menuCategoryId: string;
-      menuCategoryName?: string;
+      menuCategoryID: string;
+      menuCategoryName: string;
       lastUpdated: Date;
       createdAt: Date;
       syncStatus: "pending" | "synced" | "error";
