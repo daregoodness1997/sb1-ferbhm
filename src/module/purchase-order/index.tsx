@@ -16,8 +16,9 @@ import { Card } from "@/components/ui/Card";
 import { format } from "date-fns";
 import PurchaseOrderForm from "./components/PurchaseOrderForm";
 import CancelOrder from "./components/CancelOrder";
+import PaymentConfirmation from "./components/PaymentConfirmation";
 
-type View = "create" | "cancel" | "approve" | "recieve";
+type View = "create" | "cancel" | "approve" | "recieve" | "pay";
 
 type OrderStatus = "requested" | "approved" | "received" | "cancelled" | "paid";
 
@@ -310,7 +311,7 @@ const PurchaseOrderModule = () => {
                           }
                           onClick={() => {
                             setIsOpen(true);
-                            setView("recieve");
+                            setView("pay");
                             setSelectedItem(order);
                           }}
                           className={`px-3 py-1 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 flex gap-1 items-center ${
@@ -346,6 +347,12 @@ const PurchaseOrderModule = () => {
             )}
             {view === "cancel" && (
               <CancelOrder onClick={handleCancelOrder} onClose={handleClose} />
+            )}
+            {view === "pay" && (
+              <PaymentConfirmation
+                onClick={handleCancelOrder}
+                onClose={handleClose}
+              />
             )}
           </Modal>
         </div>
